@@ -3,7 +3,7 @@
 Deadweight is RCov for CSS, kind of. Given a set of stylesheets and a set of URLs, it determines which selectors are actually used and reports which can be "safely" deleted.
 
 Simple example:
-  # Rakefile
+  # lib/tasks/deadweight.rake
 
   require 'deadweight'
 
@@ -24,7 +24,7 @@ Things to note:
 
 More complex example:
 
-  # Rakefile
+  # lib/tasks/deadweight.rake
 
   require 'deadweight'
 
