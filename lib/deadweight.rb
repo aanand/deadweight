@@ -15,6 +15,7 @@ class Deadweight
     @log_file = STDERR
   end
 
+  # Find all unused CSS selectors and return them as an array.
   def run
     css = CssParser::Parser.new
 
@@ -66,11 +67,28 @@ class Deadweight
     unused_selectors
   end
 
-  private
-
+  # Returns the Mechanize instance, if +mechanize+ is set to +true+.
   def agent
     @agent ||= initialize_agent
   end
+
+  # Fetch a path, using Mechanize if +mechanize+ is set to +true+.
+  def fetch(path)
+    log.info(path)
+
+    loc = root + path
+
+    if @mechanize
+      loc = "file://#{File.expand_path(loc)}" unless loc =~ %r{^\w+://}
+      page = agent.get(loc)
+      log.warn("#{path} redirected to #{page.uri}") unless page.uri.to_s == loc
+      page.body
+    else
+      open(loc).read
+    end
+  end    
+
+  private
 
   def log
     @log ||= Logger.new(@log_file)
@@ -89,21 +107,6 @@ class Deadweight
       }
 
       raise
-    end
-  end    
-
-  def fetch(path)
-    log.info(path)
-
-    loc = root + path
-
-    if @mechanize
-      loc = "file://#{File.expand_path(loc)}" unless loc =~ %r{^\w+://}
-      page = agent.get(loc)
-      log.warn("#{path} redirected to #{page.uri}") unless page.uri.to_s == loc
-      page.body
-    else
-      open(loc).read
     end
   end    
 end
