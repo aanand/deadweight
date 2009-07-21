@@ -5,11 +5,13 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "deadweight"
-    gem.summary = %Q{TODO}
+    gem.summary = "RCov for CSS"
     gem.email = "aanand.prasad@gmail.com"
     gem.homepage = "http://github.com/aanand/deadweight"
     gem.authors = ["Aanand Prasad"]
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
+
+    gem.add_dependency('css_parser')
+    gem.add_dependency('hpricot')
   end
 
 rescue LoadError
