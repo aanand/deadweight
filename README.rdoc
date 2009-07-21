@@ -1,6 +1,58 @@
 = deadweight
 
-Description goes here.
+Deadweight is RCov for CSS, kind of. Given a set of stylesheets and a set of URLs, it determines which selectors are actually used and reports which can be "safely" deleted.
+
+Simple example:
+  # Rakefile
+
+  require 'deadweight'
+
+  description "run Deadweight (script/server needs to be running)"
+  task :deadweight do
+    dw = Deadweight.new
+    dw.stylesheets = %w( /stylesheets/style.css )
+    dw.pages = %w( / /page/1 /about )
+    puts dw.run
+  end
+
+This will output all unused selectors, one per line.
+
+Things to note:
+- By default, it looks at http://localhost:3000.
+- It's completely dumb about any classes, IDs or tags that are only added by your Javascript layer, but you can filter them out by setting +ignore_selectors+.
+- You can optionally tell it to use Mechanize, and set up more complicated targets for scraping by specifying them as Procs.
+
+More complex example:
+
+  # Rakefile
+
+  require 'deadweight'
+
+  description "run Deadweight on staging server"
+  task :deadweight do
+    dw = Deadweight.new
+
+    dw.mechanize = true
+
+    dw.root = 'http://staging.example.com'
+
+    dw.stylesheets = %w( /stylesheets/style.css )
+
+    dw.pages = %w( / /page/1 /about )
+
+    dw.pages << proc {
+      fetch('/login')
+      form = agent.page.forms.first
+      form.username = 'username'
+      form.password = 'password'
+      agent.submit(form)
+      fetch('/secret-page')
+    }
+
+    dw.ignore_selectors = /hover|lightbox|superimposed_kittens/
+
+    puts dw.run
+  end
 
 == Copyright
 
