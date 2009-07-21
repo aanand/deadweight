@@ -1,0 +1,12 @@
+#foo {
+    color: green;
+}
+
+#foo .bar {
+    color: blue;
+}
+
+#foo .bar .baz {
+    color: red;
+}
+
