@@ -8,7 +8,7 @@ Deadweight is RCov for CSS, kind of. Given a set of stylesheets and a set of URL
 
   require 'deadweight'
 
-  description "run Deadweight (script/server needs to be running)"
+  desc "run Deadweight (script/server needs to be running)"
   task :deadweight do
     dw = Deadweight.new
     dw.stylesheets = %w( /stylesheets/style.css )
@@ -35,7 +35,7 @@ This will output all unused selectors, one per line.
 
   require 'deadweight'
 
-  description "run Deadweight on staging server"
+  desc "run Deadweight on staging server"
   task :deadweight do
     dw = Deadweight.new
 
