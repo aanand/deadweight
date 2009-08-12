@@ -29,7 +29,7 @@ class Deadweight
     css.each_selector do |selector, declarations, specificity|
       unless unused_selectors.include?(selector)
         total_selectors += 1
-        unused_selectors << selector unless selector =~ ignore_selectors
+        unused_selectors << selector unless selector =~ ignore_selectors || selector =~ /@-moz|::?(link|visited|after|hover|active|focus|target|first-child|first-line|first-letter|selection)|@import/
       end
     end
 
