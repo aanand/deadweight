@@ -29,8 +29,15 @@ class Deadweight
     css.each_selector do |selector, declarations, specificity|
       unless unused_selectors.include?(selector)
         total_selectors += 1
-        unused_selectors << selector unless selector =~ ignore_selectors || selector =~ /@-moz|::?(link|visited|after|hover|active|focus|target|first-child|first-line|first-letter|selection)|@import/
+        unused_selectors << selector unless selector =~ ignore_selectors
       end
+    end
+
+    # Remove selectors with pseudo classes that already have an equivalent
+    # without the pseudo class. Keep the ones that don't, we need to test
+    # them.
+    unused_selectors.reject! do |selector|
+      has_pseudo_classes(selector) && unused_selectors.include?(strip(selector))
     end
 
     pages.each do |page|
@@ -53,7 +60,9 @@ class Deadweight
       found_selectors = []
 
       unused_selectors.each do |selector|
-        unless doc.search(selector).empty?
+        # We test against the selector stripped of any pseudo classes,
+        # but we report on the selector with its pseudo classes.
+        unless doc.search(strip(selector)).empty?
           log.info("  #{selector}")
           found_selectors << selector
         end
@@ -86,9 +95,17 @@ class Deadweight
     else
       open(loc).read
     end
-  end    
+  end
 
-  private
+private
+
+  def has_pseudo_classes(selector)
+    selector =~ /::?[\w\-]+/
+  end
+
+  def strip(selector)
+    selector.gsub(/::?[\w\-]+/, '')
+  end
 
   def log
     @log ||= Logger.new(@log_file)
@@ -108,6 +125,6 @@ class Deadweight
 
       raise
     end
-  end    
+  end
 end
 

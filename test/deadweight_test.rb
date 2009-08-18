@@ -20,6 +20,17 @@ class DeadweightTest < Test::Unit::TestCase
     assert !@result.include?('#foo .bar')
   end
 
+  should 'strip pseudo classes from selectors' do
+    # #oof:hover (#oof does not exist)
+    assert @result.include?('#oof:hover'), @result.inspect
+
+    # #foo:hover (#foo does exist)
+    assert !@result.include?('#foo:hover')
+
+    # #rab:hover::selection (#rab does not exist)
+    assert @result.include?('#rab:hover::selection')
+  end
+
   should "accept Procs as targets" do
     @dw.mechanize = true
 

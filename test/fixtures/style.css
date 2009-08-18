@@ -10,3 +10,15 @@
     color: red;
 }
 
+/* pseudo classes */
+#foo:hover {
+    color: red;
+}
+
+#oof:hover {
+    color: white;
+}
+
+#rab:hover::selection {
+    color: black;
+}
