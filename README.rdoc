@@ -20,7 +20,19 @@ Ryan Bates has worked his magic once again. Head over here for an excellent intr
     puts dw.run
   end
 
-This will output all unused selectors, one per line.
+This will output all unused rules, one per line.
+
+Alternately, you can run it from the command-line:
+
+  $ deadweight -s styles.css -s ie.css index.html about.html
+
+You can pipe in CSS rules from STDIN:
+
+  $ cat styles.css | deadweight index.html
+
+And you can use it as an HTTP proxy:
+
+  $ deadweight -l deadweight.log -s styles.css -w http://github.com/ -P
 
 === How You Install It
 
@@ -32,6 +44,7 @@ This will output all unused selectors, one per line.
 - By default, it looks at http://localhost:3000.
 - It's completely dumb about any classes, IDs or tags that are only added by your Javascript layer, but you can filter them out by setting +ignore_selectors+.
 - You can optionally tell it to use Mechanize, and set up more complicated targets for scraping by specifying them as Procs.
+- There is experimental support for Lyndon (http://github.com/defunkt/lyndon) with -L
 
 === A More Complex Example, In Light of All That
 

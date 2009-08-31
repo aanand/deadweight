@@ -7,20 +7,22 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aanand Prasad"]
   s.date = %q{2009-08-18}
+  s.default_executable = %q{deadweight}
   s.email = %q{aanand.prasad@gmail.com}
+  s.executables = %q{deadweight}
   s.extra_rdoc_files = [
     "LICENSE",
      "README.rdoc"
   ]
   s.files = [
-    ".document",
-     ".gitignore",
      "LICENSE",
      "README.rdoc",
      "Rakefile",
      "VERSION",
      "deadweight.gemspec",
+     "bin/deadweight",
      "lib/deadweight.rb",
+     "lib/deadweight/cli.rb",
      "test/deadweight_test.rb",
      "test/fixtures/index.html",
      "test/fixtures/index2.html",

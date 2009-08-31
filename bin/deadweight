@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+require 'deadweight/cli'
+
+Deadweight::CLI.execute(STDOUT, STDIN, STDERR, ARGV.dup)
+
