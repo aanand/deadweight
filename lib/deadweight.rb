@@ -5,6 +5,7 @@ require 'logger'
 
 class Deadweight
   attr_accessor :root, :stylesheets, :rules, :pages, :ignore_selectors, :mechanize, :log_file
+  attr_reader :unused_selectors
 
   def initialize
     @root = 'http://localhost:3000'
@@ -14,6 +15,21 @@ class Deadweight
     @ignore_selectors = []
     @mechanize = false
     @log_file = STDERR
+  end
+
+  def analyze(html)
+    doc = Hpricot(html)
+
+    found_selectors = []
+
+    @unused_selectors.collect do |selector, declarations|
+      # We test against the selector stripped of any pseudo classes,
+      # but we report on the selector with its pseudo classes.
+      unless doc.search(strip(selector)).empty?
+        log.info("  #{selector}")
+        selector
+      end
+    end
   end
 
   # Find all unused CSS selectors and return them as an array.
@@ -26,21 +42,23 @@ class Deadweight
 
     css.add_block!(rules)
 
-    unused_selectors = []
+    @unused_selectors = {}
     total_selectors = 0
 
     css.each_selector do |selector, declarations, specificity|
-      unless unused_selectors.include?(selector)
+      unless @unused_selectors[selector]
         total_selectors += 1
-        unused_selectors << selector unless selector =~ ignore_selectors
+        @unused_selectors[selector] = declarations unless selector =~ ignore_selectors
       end
     end
 
     # Remove selectors with pseudo classes that already have an equivalent
     # without the pseudo class. Keep the ones that don't, we need to test
     # them.
-    unused_selectors.reject! do |selector|
-      has_pseudo_classes(selector) && unused_selectors.include?(strip(selector))
+    @unused_selectors.keys.each do |selector|
+      if has_pseudo_classes(selector) && @unused_selectors.include?(strip(selector))
+        @unused_selectors.delete(selector)
+      end
     end
 
     pages.each do |page|
@@ -59,25 +77,18 @@ class Deadweight
                end
       end
 
-      doc = Hpricot(html)
-
-      found_selectors = []
-
-      unused_selectors.each do |selector|
-        # We test against the selector stripped of any pseudo classes,
-        # but we report on the selector with its pseudo classes.
-        unless doc.search(strip(selector)).empty?
-          log.info("  #{selector}")
-          found_selectors << selector
-        end
-      end
-
-      unused_selectors -= found_selectors
+      process!(html)
     end
 
-    log.info "found #{unused_selectors.size} unused selectors out of #{total_selectors} total"
+    log.info "found #{@unused_selectors.size} unused selectors out of #{total_selectors} total"
 
-    unused_selectors
+    @unused_selectors
+  end
+
+  def process!(html)
+    analyze(html).each do |selector|
+      @unused_selectors.delete(selector)
+    end
   end
 
   # Returns the Mechanize instance, if +mechanize+ is set to +true+.
