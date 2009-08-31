@@ -42,7 +42,8 @@ class Deadweight
 
     pages.each do |page|
       case page
-      when String
+      # TODO this is ugly, but just listing IO doesn't work (since it's a Module)
+      when String, StringIO, File, IO
         html = fetch(page)
       else
         result = instance_eval(&page)
@@ -83,6 +84,9 @@ class Deadweight
 
   # Fetch a path, using Mechanize if +mechanize+ is set to +true+.
   def fetch(path)
+    # Handle IO objects appropriately
+    return path.read if path.respond_to?(:read)
+
     log.info(path)
 
     loc = root + path
