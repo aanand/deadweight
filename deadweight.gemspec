@@ -47,9 +47,13 @@ Gem::Specification.new do |s|
     else
       s.add_dependency(%q<css_parser>, [">= 0"])
       s.add_dependency(%q<hpricot>, [">= 0"])
+      s.add_dependency(%q<mechanize>, [">= 0"])
+      s.add_dependency(%q<Shoulda>, [">= 0"])
     end
   else
     s.add_dependency(%q<css_parser>, [">= 0"])
     s.add_dependency(%q<hpricot>, [">= 0"])
+    s.add_dependency(%q<mechanize>, [">= 0"])
+    s.add_dependency(%q<Shoulda>, [">= 0"])
   end
 end
