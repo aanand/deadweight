@@ -122,6 +122,8 @@ class Deadweight
       # initialize selectors
       dw.run
 
+      stdout.puts "#{dw.unused_selectors.length} rules loaded."
+
       require 'webrick/httpproxy'
 
       @proxy = WEBrick::HTTPProxyServer.new \
@@ -136,9 +138,9 @@ class Deadweight
           parse_this = false
 
           if options[:whitelist]
-            p options[:whitelist]
             options[:whitelist].each do |x|
-              if response.request_uri.to_s[0..x.length - 1].downcase == x.downcase
+              sliced_request_uri = response.request_uri.to_s[0..x.length - 1]
+              if sliced_request_uri.downcase == x.downcase
                 parse_this = true
                 break 
               end
@@ -147,13 +149,23 @@ class Deadweight
             parse_this = true
           end
 
-          if parse_this
-            dw.process!(response.body)
+          if parse_this && response.header["content-type"] =~ /text\/html/
+            body = if response.header["content-encoding"] = "gzip"
+              # TODO this slows things down significantly; better would be to
+              # remove the Accept-Encoding header during the request phase
+              Zlib::GzipReader.new(StringIO.new(response.body)).read
 
-            stdout.puts "After reviewing <#{response.request_uri}>, these were left:"
-            dw.unused_selectors.each do |k,v|
-              stdout.puts "#{k} { #{v} }"
+              # TODO handle deflate encoding
+            else
+              response.body
             end
+            dw.process!(body)
+
+            stdout.puts "After reviewing <#{response.request_uri}>, there were #{dw.unused_selectors.length} rules left"
+            # stdout.puts "After reviewing <#{response.request_uri}>, these were left:"
+            # dw.unused_selectors.each do |k,v|
+            #   stdout.puts "#{k} { #{v} }"
+            # end
           end
         }
 
