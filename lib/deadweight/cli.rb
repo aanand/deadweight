@@ -150,12 +150,12 @@ class Deadweight
           end
 
           if parse_this && response.header["content-type"] =~ /text\/html/
-            body = if response.header["content-encoding"] = "gzip"
-              # TODO this slows things down significantly; better would be to
-              # remove the Accept-Encoding header during the request phase
+            # TODO this slows things down significantly; better would be to
+            # remove the Accept-Encoding header during the request phase
+            body = if response.header["content-encoding"] == "gzip"
               Zlib::GzipReader.new(StringIO.new(response.body)).read
-
-              # TODO handle deflate encoding
+            elsif response.header["content-encoding"] == "deflate"
+              Zlib::Inflate.inflate(response.body)
             else
               response.body
             end
