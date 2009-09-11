@@ -1,4 +1,9 @@
 #!/usr/bin/env ruby
+
+$LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
+
+require 'rubygems'
+require 'deadweight'
 require 'deadweight/cli'
 
 Deadweight::CLI.execute(STDOUT, STDIN, STDERR, ARGV.dup)
