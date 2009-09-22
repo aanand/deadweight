@@ -15,6 +15,7 @@ class Deadweight
     @ignore_selectors = []
     @mechanize = false
     @log_file = STDERR
+    yield self and run if block_given?
   end
 
   def analyze(html)

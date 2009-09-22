@@ -11,6 +11,28 @@ class DeadweightTest < Test::Unit::TestCase
     @result = @dw.run
   end
 
+  context "when initialized with a block" do
+    setup do
+      @dwb = Deadweight.new do |d|
+        d.log_file = 'test.log'
+        d.root = File.dirname(__FILE__) + '/fixtures'
+        d.stylesheets << '/style.css'
+        d.pages << '/index.html'
+      end
+    end
+
+    should "have the same attributes" do
+      assert_equal(@dw.log_file,    @dwb.log_file)
+      assert_equal(@dw.root,        @dwb.root)
+      assert_equal(@dw.stylesheets, @dwb.stylesheets)
+      assert_equal(@dw.pages,       @dwb.pages)
+    end
+
+    should "immediately run" do
+      assert @result.include?('#foo .bar .baz')
+    end
+  end
+
   should "report unused selectors" do
     assert @result.include?('#foo .bar .baz')
   end
