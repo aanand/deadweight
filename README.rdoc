@@ -2,6 +2,10 @@
 
 Deadweight is RCov for CSS, kind of. Given a set of stylesheets and a set of URLs, it determines which selectors are actually used and reports which can be "safely" deleted.
 
+=== Screencast!
+
+Ryan Bates has worked his magic once again. Head over here for an excellent introduction to deadweight: http://railscasts.com/episodes/180-finding-unused-css
+
 === A Simple Example
 
   # lib/tasks/deadweight.rake
