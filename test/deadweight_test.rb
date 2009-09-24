@@ -53,4 +53,8 @@ class DeadweightTest < Test::Unit::TestCase
 
     assert @dw.run.include?(".something")
   end
+
+  should 'provide the results of its last run with #unused_selectors' do
+    assert_equal @result, @dw.unused_selectors
+  end
 end
