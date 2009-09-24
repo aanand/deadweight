@@ -41,4 +41,10 @@ class DeadweightTest < Test::Unit::TestCase
 
     assert @dw.run.empty?
   end
+
+  should "accept IO objects as targets" do
+    @dw.pages << File.new(File.dirname(__FILE__) + '/fixtures/index2.html')
+
+    assert @dw.run.empty?
+  end
 end

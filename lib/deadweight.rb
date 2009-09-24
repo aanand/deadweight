@@ -41,10 +41,9 @@ class Deadweight
     end
 
     pages.each do |page|
-      case page
-      when String
-        html = fetch(page)
-      else
+      if page.respond_to?(:read)
+        html = page.read
+      elsif page.respond_to?(:call)
         result = instance_eval(&page)
 
         html = case result
@@ -53,6 +52,8 @@ class Deadweight
                else
                  @agent.page.body
                end
+      else
+        html = fetch(page)
       end
 
       doc = Hpricot(html)
