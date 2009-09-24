@@ -4,12 +4,13 @@ require 'open-uri'
 require 'logger'
 
 class Deadweight
-  attr_accessor :root, :stylesheets, :pages, :ignore_selectors, :mechanize, :log_file
+  attr_accessor :root, :stylesheets, :rules, :pages, :ignore_selectors, :mechanize, :log_file
 
   def initialize
     @root = 'http://localhost:3000'
     @stylesheets = []
     @pages = []
+    @rules = ""
     @ignore_selectors = []
     @mechanize = false
     @log_file = STDERR
@@ -22,6 +23,8 @@ class Deadweight
     @stylesheets.each do |path|
       css.add_block!(fetch(path))
     end
+
+    css.add_block!(rules)
 
     unused_selectors = []
     total_selectors = 0

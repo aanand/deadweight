@@ -47,4 +47,10 @@ class DeadweightTest < Test::Unit::TestCase
 
     assert @dw.run.empty?
   end
+
+  should "allow individual CSS rules to be appended" do
+    @dw.rules = ".something { display: block; }"
+
+    assert @dw.run.include?(".something")
+  end
 end
