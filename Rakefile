@@ -5,7 +5,7 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "deadweight"
-    gem.summary = "RCov for CSS"
+    gem.summary = "A coverage tool for finding unused CSS"
     gem.email = "aanand.prasad@gmail.com"
     gem.homepage = "http://github.com/aanand/deadweight"
     gem.authors = ["Aanand Prasad"]

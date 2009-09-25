@@ -1,6 +1,6 @@
 = deadweight
 
-Deadweight is RCov for CSS, kind of. Given a set of stylesheets and a set of URLs, it determines which selectors are actually used and reports which can be "safely" deleted.
+Deadweight is a CSS coverage tool. Given a set of stylesheets and a set of URLs, it determines which selectors are actually used and reports which can be "safely" deleted.
 
 === Screencast!
 
