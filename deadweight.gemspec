@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aanand Prasad"]
-  s.date = %q{2009-09-24}
+  s.date = %q{2009-09-25}
   s.default_executable = %q{deadweight}
   s.email = %q{aanand.prasad@gmail.com}
   s.executables = ["deadweight"]
@@ -39,7 +39,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.4}
-  s.summary = %q{RCov for CSS}
+  s.summary = %q{A coverage tool for finding unused CSS}
   s.test_files = [
     "test/cli_test.rb",
      "test/deadweight_test.rb",
