@@ -33,16 +33,7 @@ And you can use it as an HTTP proxy:
 
 === How You Install It
 
-Using http://gemcutter.org:
-
-  gem install gemcutter
-  gem tumble
-  gem install deadweight
-
-Using GitHub:
-
-  gem sources -a http://gems.github.com
-  gem install aanand-deadweight
+  gem install deadweight -s http://gemcutter.org
 
 === Things to Note
 
