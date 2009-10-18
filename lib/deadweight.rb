@@ -5,7 +5,7 @@ require 'logger'
 
 class Deadweight
   attr_accessor :root, :stylesheets, :rules, :pages, :ignore_selectors, :mechanize, :log_file
-  attr_reader :unused_selectors
+  attr_reader :unused_selectors, :parsed_rules
 
   def initialize
     @root = 'http://localhost:3000'
@@ -43,20 +43,25 @@ class Deadweight
 
     css.add_block!(rules)
 
-    @unused_selectors = {}
-    total_selectors = 0
+    @parsed_rules     = {}
+    @unused_selectors = []
+    total_selectors   = 0
 
     css.each_selector do |selector, declarations, specificity|
-      unless @unused_selectors[selector]
+      unless @unused_selectors.include?(selector)
         total_selectors += 1
-        @unused_selectors[selector] = declarations unless selector =~ ignore_selectors
+
+        unless selector =~ ignore_selectors
+          @unused_selectors << selector
+          @parsed_rules[selector] = declarations
+        end
       end
     end
 
     # Remove selectors with pseudo classes that already have an equivalent
     # without the pseudo class. Keep the ones that don't, we need to test
     # them.
-    @unused_selectors.keys.each do |selector|
+    @unused_selectors.each do |selector|
       if has_pseudo_classes(selector) && @unused_selectors.include?(strip(selector))
         @unused_selectors.delete(selector)
       end
@@ -87,9 +92,7 @@ class Deadweight
   end
 
   def dump(output)
-    @unused_selectors.each do |k,v|
-      output.puts "#{k} { #{v} }"
-    end
+    output.puts(@unused_selectors)
   end
 
   def process!(html)

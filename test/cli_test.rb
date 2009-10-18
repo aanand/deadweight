@@ -4,15 +4,15 @@ class CliTest < Test::Unit::TestCase
   COMMAND = "ruby -rubygems -Ilib bin/deadweight -s test/fixtures/style.css test/fixtures/index.html 2>/dev/null"
 
   should "output unused selectors on STDOUT" do
-    @result = `#{COMMAND}`.split("\n")
+    @result = `#{COMMAND}`
 
     assert_correct_selectors_in_output(@result)
   end
 
   should "accept CSS rules on STDIN" do
-    @result = `echo ".something { display: block; }" | #{COMMAND}`.split("\n")
+    @result = `echo ".something { display: block; }" | #{COMMAND}`
 
-    assert_equal 1, @result.grep(/^\.something \{/).length
+    assert @result.include?('.something')
   end
 end
 

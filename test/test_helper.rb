@@ -12,25 +12,29 @@ class Test::Unit::TestCase
 
   def self.should_correctly_report_selectors
     should "report unused selectors" do
-      UNUSED_SELECTORS.each do |s|
-        assert @result.include?(s)
-      end
+      assert_reports_unused_selectors(@result)
     end
 
     should "not report used selectors" do
-      USED_SELECTORS.each do |s|
-        assert !@result.include?(s)
-      end
+      assert_does_not_report_used_selectors(@result)
     end
   end
 
   def assert_correct_selectors_in_output(output)
-    UNUSED_SELECTORS.each do |s|
-      assert_equal 1, output.grep(%r{^#{Regexp.escape(s)} \{}).length
-    end
+    selectors = output.split("\n")
+    assert_reports_unused_selectors(selectors)
+    assert_does_not_report_used_selectors(selectors)
+  end
 
+  def assert_reports_unused_selectors(output)
+    UNUSED_SELECTORS.each do |s|
+      assert output.include?(s)
+    end
+  end
+
+  def assert_does_not_report_used_selectors(output)
     USED_SELECTORS.each do |s|
-      assert_equal 0, output.grep(%r{^#{Regexp.escape(s)} \{}).length
+      assert !output.include?(s)
     end
   end
 

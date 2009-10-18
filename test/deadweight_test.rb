@@ -65,4 +65,8 @@ class DeadweightTest < Test::Unit::TestCase
   should 'provide the results of its last run with #unused_selectors' do
     assert_equal @result, @dw.unused_selectors
   end
+
+  should 'provide the parsed CSS rules with #parsed_rules' do
+    assert_equal 'color: green;', @dw.parsed_rules['#foo']
+  end
 end
