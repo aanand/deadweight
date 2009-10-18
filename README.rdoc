@@ -12,15 +12,12 @@ Ryan Bates has worked his magic once again. Head over here for an excellent intr
 
   require 'deadweight'
 
-  desc "run Deadweight (script/server needs to be running)"
-  task :deadweight do
-    dw = Deadweight.new
+  Deadweight::RakeTask.new do |dw|
     dw.stylesheets = %w( /stylesheets/style.css )
     dw.pages = %w( / /page/1 /about )
-    puts dw.run
   end
 
-This will output all unused rules, one per line.
+Running <tt>rake deadweight</tt> will output all unused rules, one per line. Note that it looks at http://localhost:3000 by default, so you'll need to have <tt>script/server</tt> (or whatever your server command looks like) running.
 
 Alternately, you can run it from the command-line:
 
@@ -49,7 +46,6 @@ Using GitHub:
 
 === Things to Note
 
-- By default, it looks at http://localhost:3000.
 - It's completely dumb about any classes, IDs or tags that are only added by your Javascript layer, but you can filter them out by setting +ignore_selectors+.
 - You can optionally tell it to use Mechanize, and set up more complicated targets for scraping by specifying them as Procs.
 - There is experimental support for Lyndon (http://github.com/defunkt/lyndon) with -L
@@ -60,10 +56,7 @@ Using GitHub:
 
   require 'deadweight'
 
-  desc "run Deadweight on staging server"
-  task :deadweight do
-    dw = Deadweight.new
-
+  Deadweight::RakeTask.new do |dw|
     dw.mechanize = true
 
     dw.root = 'http://staging.example.com'
@@ -82,8 +75,6 @@ Using GitHub:
     }
 
     dw.ignore_selectors = /hover|lightbox|superimposed_kittens/
-
-    puts dw.run
   end
 
 == Copyright

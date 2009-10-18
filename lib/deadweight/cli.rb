@@ -104,10 +104,8 @@ class Deadweight
         dw.pages = arguments
       end
 
-      unused_rules = dw.run
-      unused_rules.each do |k,v|
-        output.puts "#{k} { #{v} }"
-      end
+      dw.run
+      dw.dump(output)
     end
 
     def proxy

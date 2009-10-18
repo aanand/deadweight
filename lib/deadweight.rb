@@ -86,6 +86,12 @@ class Deadweight
     @unused_selectors
   end
 
+  def dump(output)
+    @unused_selectors.each do |k,v|
+      output.puts "#{k} { #{v} }"
+    end
+  end
+
   def process!(html)
     analyze(html).each do |selector|
       @unused_selectors.delete(selector)
@@ -143,4 +149,6 @@ private
     end
   end
 end
+
+require 'deadweight/rake_task'
 

@@ -3,22 +3,17 @@ require 'test_helper'
 class DeadweightTest < Test::Unit::TestCase
   def setup
     @dw = Deadweight.new
-    @dw.log_file = 'test.log'
-    @dw.root = File.dirname(__FILE__) + '/fixtures'
-    @dw.stylesheets << '/style.css'
-    @dw.pages << '/index.html'
-
+    default_settings(@dw)
     @result = @dw.run
   end
 
   context "when initialized with a block" do
     setup do
-      @dwb = Deadweight.new do |d|
-        d.log_file = 'test.log'
-        d.root = File.dirname(__FILE__) + '/fixtures'
-        d.stylesheets << '/style.css'
-        d.pages << '/index.html'
+      @dwb = Deadweight.new do |dw|
+        default_settings(dw)
       end
+
+      @result = @dwb.run
     end
 
     should "have the same attributes" do
@@ -28,19 +23,10 @@ class DeadweightTest < Test::Unit::TestCase
       assert_equal(@dw.pages,       @dwb.pages)
     end
 
-    should "immediately run" do
-      assert @result.include?('#foo .bar .baz')
-    end
+    should_correctly_report_selectors
   end
 
-  should "report unused selectors" do
-    assert @result.include?('#foo .bar .baz')
-  end
-
-  should "not report used selectors" do
-    assert !@result.include?('#foo')
-    assert !@result.include?('#foo .bar')
-  end
+  should_correctly_report_selectors
 
   should 'strip pseudo classes from selectors' do
     # #oof:hover (#oof does not exist)
