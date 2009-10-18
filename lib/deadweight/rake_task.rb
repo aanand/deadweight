@@ -4,7 +4,6 @@ class Deadweight
       desc "run deadweight"
       task :deadweight do
         dw = Deadweight.new(&block)
-        dw.run
         dw.dump(output)
       end
     end
