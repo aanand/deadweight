@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{deadweight}
-  s.version = "0.1.0"
+  s.version = "0.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aanand Prasad"]
-  s.date = %q{2009-09-25}
+  s.date = %q{2009-10-18}
   s.default_executable = %q{deadweight}
   s.email = %q{aanand.prasad@gmail.com}
   s.executables = ["deadweight"]
@@ -28,11 +28,13 @@ Gem::Specification.new do |s|
      "deadweight.gemspec",
      "lib/deadweight.rb",
      "lib/deadweight/cli.rb",
+     "lib/deadweight/rake_task.rb",
      "test/cli_test.rb",
      "test/deadweight_test.rb",
      "test/fixtures/index.html",
      "test/fixtures/index2.html",
      "test/fixtures/style.css",
+     "test/rake_task_test.rb",
      "test/test_helper.rb"
   ]
   s.homepage = %q{http://github.com/aanand/deadweight}
@@ -43,6 +45,7 @@ Gem::Specification.new do |s|
   s.test_files = [
     "test/cli_test.rb",
      "test/deadweight_test.rb",
+     "test/rake_task_test.rb",
      "test/test_helper.rb"
   ]
 
