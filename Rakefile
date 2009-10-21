@@ -10,7 +10,6 @@ begin
     gem.homepage = "http://github.com/aanand/deadweight"
     gem.authors = ["Aanand Prasad"]
 
-    gem.add_dependency('css_parser')
     gem.add_dependency('hpricot')
   end
 
