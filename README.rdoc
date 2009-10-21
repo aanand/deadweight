@@ -6,7 +6,11 @@ Deadweight is a CSS coverage tool. Given a set of stylesheets and a set of URLs,
 
 Ryan Bates has worked his magic once again. Head over here for an excellent introduction to deadweight: http://railscasts.com/episodes/180-finding-unused-css
 
-=== A Simple Example
+=== Install It
+
+  gem install deadweight -s http://gemcutter.org
+
+=== Make a Rake Task
 
   # lib/tasks/deadweight.rake
 
@@ -19,7 +23,7 @@ Ryan Bates has worked his magic once again. Head over here for an excellent intr
 
 Running <tt>rake deadweight</tt> will output all unused rules, one per line. Note that it looks at http://localhost:3000 by default, so you'll need to have <tt>script/server</tt> (or whatever your server command looks like) running.
 
-Alternately, you can run it from the command-line:
+=== Or Run it From the Command Line
 
   $ deadweight -s styles.css -s ie.css index.html about.html
 
@@ -31,15 +35,22 @@ And you can use it as an HTTP proxy:
 
   $ deadweight -l deadweight.log -s styles.css -w http://github.com/ -P
 
-=== How You Install It
+There's also experimental support for Lyndon (http://github.com/defunkt/lyndon) with <tt>-L</tt>.
 
-  gem install deadweight -s http://gemcutter.org
+=== Or Call it Directly
+
+  require 'deadweight'
+
+  dw = Deadweight.new
+  dw.stylesheets = %w( /stylesheets/style.css )
+  dw.pages = %w( / /page/1 /about )
+  puts dw.run
 
 === Things to Note
 
+- You can tell it what URL root to use (rather than <tt>http://localhost:3000</tt>) by setting +root+.
 - It's completely dumb about any classes, IDs or tags that are only added by your Javascript layer, but you can filter them out by setting +ignore_selectors+.
 - You can optionally tell it to use Mechanize, and set up more complicated targets for scraping by specifying them as Procs.
-- There is experimental support for Lyndon (http://github.com/defunkt/lyndon) with -L
 
 === A More Complex Example, In Light of All That
 
