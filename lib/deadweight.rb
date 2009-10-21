@@ -1,3 +1,5 @@
+$LOAD_PATH.concat Dir.glob(File.expand_path('../../vendor/gems/*/lib', __FILE__))
+
 require 'css_parser'
 require 'hpricot'
 require 'open-uri'

@@ -1,0 +1,13 @@
+=== Ruby CSS Parser CHANGELOG
+
+==== Version 0.9.1
+ * Fixed RuleSet#declaration_to_s so it would respect <tt>!important</tt> 
+   rules (thanks to Dana - http://github.com/DanaDanger)
+
+==== Version 0.9
+ * Initial version forked from Premailer project
+
+==== TODO: Future
+ * border shorthand/folding support
+ * re-implement caching on CssParser.merge
+ * correctly parse http://www.webstandards.org/files/acid2/test.html

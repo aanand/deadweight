@@ -1,0 +1,58 @@
+=== Ruby CSS Parser
+
+Load, parse and cascade CSS rule sets in Ruby.
+
+==== Setup
+
+Install the gem from RubyGems.
+
+   gem install css_parser
+
+Done.
+
+==== An example
+  require 'css_parser'
+  include CssParser
+
+  parser = CssParser::Parser.new
+  parser.load_file!('http://example.com/styles/style.css')
+
+  # lookup a rule by a selector
+  parser.find('#content')
+  #=> 'font-size: 13px; line-height: 1.2;'
+
+  # lookup a rule by a selector and media type
+  parser.find('#content', [:screen, :handheld])
+
+  # iterate through selectors by media type
+  parser.each_selector(:screen) do |selector, declarations, specificity|
+    ...
+  end
+
+  # add a block of CSS
+  css = <<-EOT
+    body { margin: 0 1em; }
+  EOT
+
+  parser.add_block!(css)
+
+  # output all CSS rules in a single stylesheet
+  parser.to_s
+  => #content { font-size: 13px; line-height: 1.2; }
+     body { margin: 0 1em; }
+
+==== Testing
+
+You can run the suite of unit tests using <tt>rake test</tt>.
+
+The download/import tests require that WEBrick is installed.  The tests set up
+a temporary server on port 12000 and pull down files from the <tt>test/fixtures/</tt> 
+directory.
+
+==== Credits and code
+
+By Alex Dunae (dunae.ca, e-mail 'code' at the same domain), 2007-08.
+
+Thanks to Dana (http://github.com/DanaDanger) for the 0.9.1 update.
+
+Made on Vancouver Island.
