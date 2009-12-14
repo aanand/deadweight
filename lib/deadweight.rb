@@ -3,7 +3,16 @@ $LOAD_PATH.concat Dir.glob(File.expand_path('../../vendor/gems/*/lib', __FILE__)
 require 'css_parser'
 require 'hpricot'
 require 'open-uri'
-require 'logger'
+
+begin
+  require 'colored'
+rescue LoadError
+  class String
+    %w(red green blue yellow).each do |color|
+      define_method(color) { self }
+    end
+  end
+end
 
 class Deadweight
   attr_accessor :root, :stylesheets, :rules, :pages, :ignore_selectors, :mechanize, :log_file
@@ -27,7 +36,7 @@ class Deadweight
       # We test against the selector stripped of any pseudo classes,
       # but we report on the selector with its pseudo classes.
       unless doc.search(strip(selector)).empty?
-        log.info("  #{selector}")
+        log.puts("  #{selector.green}")
         selector
       end
     end
@@ -68,6 +77,8 @@ class Deadweight
     end
 
     pages.each do |page|
+      log.puts
+
       if page.respond_to?(:read)
         html = page.read
       elsif page.respond_to?(:call)
@@ -83,7 +94,7 @@ class Deadweight
         begin
           html = fetch(page)
         rescue FetchError => e
-          log.error(e.message)
+          log.puts(e.message.red)
           next
         end
       end
@@ -91,7 +102,9 @@ class Deadweight
       process!(html)
     end
 
-    log.info "found #{@unused_selectors.size} unused selectors out of #{total_selectors} total"
+    log.puts
+    log.puts "found #{@unused_selectors.size} unused selectors out of #{total_selectors} total".yellow
+    log.puts
 
     @unused_selectors
   end
@@ -113,7 +126,7 @@ class Deadweight
 
   # Fetch a path, using Mechanize if +mechanize+ is set to +true+.
   def fetch(path)
-    log.info(path)
+    log.puts(path)
 
     loc = root + path
 
@@ -126,7 +139,7 @@ class Deadweight
         raise FetchError.new(path, e.response_code)
       end
 
-      log.warn("#{path} redirected to #{page.uri}") unless page.uri.to_s == loc
+      log.puts("#{path} redirected to #{page.uri}".red) unless page.uri.to_s == loc
 
       page.body
     else
@@ -145,7 +158,11 @@ private
   end
 
   def log
-    @log ||= Logger.new(@log_file)
+    @log ||= if @log_file.respond_to?(:puts)
+               @log_file
+             else
+               open(@log_file, 'w+')
+             end
   end
 
   def initialize_agent
@@ -153,7 +170,7 @@ private
       require 'mechanize'
       return WWW::Mechanize.new
     rescue LoadError
-      log.info %{
+      log.puts %{
         =================================================================
         Couldn't load 'mechanize', which is required for remote scraping.
         Install it like so: gem install mechanize
