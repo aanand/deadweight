@@ -23,8 +23,6 @@ class Deadweight
   def analyze(html)
     doc = Hpricot(html)
 
-    found_selectors = []
-
     @unused_selectors.collect do |selector, declarations|
       # We test against the selector stripped of any pseudo classes,
       # but we report on the selector with its pseudo classes.
