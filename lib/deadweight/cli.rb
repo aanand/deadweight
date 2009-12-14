@@ -9,6 +9,7 @@ class Deadweight
 
     def self.execute(stdout, stdin, stderr, arguments = [])
       @options = {
+        :root       => "",
         :log_file   => stderr,
         :output     => stdout,
         :proxy_port => 8002
@@ -51,6 +52,11 @@ class Deadweight
           @options[:stylesheets] << v
         end
 
+        opts.on("-r", "--root URL-OR-PATH",
+                "Specify a root for all urls/paths") do |r|
+          @options[:root] = r
+        end
+
         opts.on("-w", "--whitelist URL-PREFIX",
                 "Specifies a prefix for URLs to process") do |v|
           @options[:whitelist] ||= []
@@ -88,7 +94,7 @@ class Deadweight
       dw = Deadweight.new
 
       # TODO this should be the default
-      dw.root = ""
+      dw.root = options[:root]
 
       dw.log_file = options[:log_file]
 
@@ -112,7 +118,7 @@ class Deadweight
       dw = Deadweight.new
 
       # TODO note the boilerplate shared with #process
-      dw.root = ""
+      dw.root = options[:root]
       dw.log_file = options[:log_file]
       dw.stylesheets = options[:stylesheets]
       dw.rules = stdin.read if stdin.stat.size > 0

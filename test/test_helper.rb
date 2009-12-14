@@ -28,13 +28,13 @@ class Test::Unit::TestCase
 
   def assert_reports_unused_selectors(output)
     UNUSED_SELECTORS.each do |s|
-      assert output.include?(s)
+      assert output.include?(s), "output is missing #{s.inspect}:\n#{output}"
     end
   end
 
   def assert_does_not_report_used_selectors(output)
     USED_SELECTORS.each do |s|
-      assert !output.include?(s)
+      assert !output.include?(s), "output should not contain #{s.inspect}:\n#{output}"
     end
   end
 
