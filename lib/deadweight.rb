@@ -82,7 +82,12 @@ class Deadweight
                  @agent.page.body
                end
       else
-        html = fetch(page)
+        begin
+          html = fetch(page)
+        rescue FetchError => e
+          log.error(e.message)
+          next
+        end
       end
 
       process!(html)
@@ -116,8 +121,15 @@ class Deadweight
 
     if @mechanize
       loc = "file://#{File.expand_path(loc)}" unless loc =~ %r{^\w+://}
-      page = agent.get(loc)
+
+      begin
+        page = agent.get(loc)
+      rescue WWW::Mechanize::ResponseCodeError => e
+        raise FetchError.new(path, e.response_code)
+      end
+
       log.warn("#{path} redirected to #{page.uri}") unless page.uri.to_s == loc
+
       page.body
     else
       open(loc).read
@@ -151,6 +163,12 @@ private
       }
 
       raise
+    end
+  end
+
+  class FetchError < StandardError
+    def initialize(path, response_code)
+      super("#{path} returned a response code of #{response_code}")
     end
   end
 end
