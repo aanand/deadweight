@@ -136,14 +136,20 @@ class Deadweight
       begin
         page = agent.get(loc)
       rescue WWW::Mechanize::ResponseCodeError => e
-        raise FetchError.new(path, e.response_code)
+        raise FetchError.new("#{loc} returned a response code of #{e.response_code}")
       end
 
-      log.puts("#{path} redirected to #{page.uri}".red) unless page.uri.to_s == loc
+      log.puts("#{loc} redirected to #{page.uri}".red) unless page.uri.to_s == loc
 
       page.body
     else
-      open(loc).read
+      begin
+        open(loc).read
+      rescue Errno::ENOENT
+        raise FetchError.new("#{loc} was not found")
+      rescue OpenURI::HTTPError => e
+        raise FetchError.new("retrieving #{loc} raised an HTTP error: #{e.message}")
+      end
     end
   end
 
@@ -181,11 +187,7 @@ private
     end
   end
 
-  class FetchError < StandardError
-    def initialize(path, response_code)
-      super("#{path} returned a response code of #{response_code}")
-    end
-  end
+  class FetchError < StandardError; end
 end
 
 require 'deadweight/rake_task'
