@@ -54,12 +54,9 @@ class Deadweight
 
     @parsed_rules     = {}
     @unused_selectors = []
-    total_selectors   = 0
 
     css.each_selector do |selector, declarations, specificity|
       unless @unused_selectors.include?(selector)
-        total_selectors += 1
-
         unless selector =~ ignore_selectors
           @unused_selectors << selector
           @parsed_rules[selector] = declarations
@@ -75,6 +72,8 @@ class Deadweight
         @unused_selectors.delete(selector)
       end
     end
+
+    total_selectors = @unused_selectors.size
 
     pages.each do |page|
       log.puts
