@@ -42,35 +42,40 @@ class Deadweight
     end
   end
 
-  # Find all unused CSS selectors and return them as an array.
-  def run
-    css = CssParser::Parser.new
+  def add_css!(css)
+    parser = CssParser::Parser.new
+    parser.add_block!(css)
 
-    @stylesheets.each do |path|
-      css.add_block!(fetch(path))
+    selector_count = 0
+
+    parser.each_selector do |selector, declarations, specificity|
+      next if @unused_selectors.include?(selector)
+      next if selector =~ @ignore_selectors
+      next if has_pseudo_classes(selector) and @unused_selectors.include?(strip(selector))
+
+      @unused_selectors << selector
+      @parsed_rules[selector] = declarations
+
+      selector_count += 1
     end
 
-    css.add_block!(rules)
+    selector_count
+  end
 
+  # Find all unused CSS selectors and return them as an array.
+  def run
     @parsed_rules     = {}
     @unused_selectors = []
 
-    css.each_selector do |selector, declarations, specificity|
-      unless @unused_selectors.include?(selector)
-        unless selector =~ ignore_selectors
-          @unused_selectors << selector
-          @parsed_rules[selector] = declarations
-        end
-      end
+    @stylesheets.each do |path|
+      new_selector_count = add_css!(fetch(path))
+      log.puts("  found #{new_selector_count} selectors".yellow)
     end
 
-    # Remove selectors with pseudo classes that already have an equivalent
-    # without the pseudo class. Keep the ones that don't, we need to test
-    # them.
-    @unused_selectors.each do |selector|
-      if has_pseudo_classes(selector) && @unused_selectors.include?(strip(selector))
-        @unused_selectors.delete(selector)
-      end
+    if @rules and !@rules.empty?
+      new_selector_count = add_css!(@rules)
+      log.puts
+      log.puts("Added #{new_selector_count} extra selectors".yellow)
     end
 
     total_selectors = @unused_selectors.size
