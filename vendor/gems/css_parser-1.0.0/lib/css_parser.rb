@@ -1,6 +1,6 @@
 $:.unshift File.dirname(__FILE__)
 require 'uri'
-require 'md5'
+require 'digest/md5'
 require 'zlib'
 require 'iconv'
 require 'css_parser/rule_set'

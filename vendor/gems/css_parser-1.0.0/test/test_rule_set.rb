@@ -1,4 +1,5 @@
 require File.dirname(__FILE__) + '/test_helper'
+require "set"
 
 # Test cases for parsing CSS blocks
 class RuleSetTests < Test::Unit::TestCase
@@ -32,7 +33,7 @@ class RuleSetTests < Test::Unit::TestCase
     expected = [
        {:selector => "#content p", :declarations => "color: #fff;", :specificity => 101},
        {:selector => "a", :declarations => "color: #fff;", :specificity => 1}
-    ]    
+    ]
     
     actual = []
     rs = RuleSet.new('#content p, a', 'color: #fff;')
@@ -44,13 +45,13 @@ class RuleSetTests < Test::Unit::TestCase
   end
 
   def test_each_declaration
-    expected = [
+    expected = Set.new([
        {:property => 'margin', :value => '1px -0.25em', :is_important => false},
        {:property => 'background', :value => 'white none no-repeat', :is_important => true},
        {:property => 'color', :value => '#fff', :is_important => false}
-    ]    
+    ])
     
-    actual = []
+    actual = Set.new
     rs = RuleSet.new(nil, 'color: #fff; Background: white none no-repeat !important; margin: 1px -0.25em;')
     rs.each_declaration do |prop, val, imp|
       actual << {:property => prop, :value => val, :is_important => imp}

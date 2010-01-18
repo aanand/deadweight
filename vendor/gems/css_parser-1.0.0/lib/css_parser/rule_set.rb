@@ -48,6 +48,11 @@ module CssParser
     #
     # If the property already exists its value will be over-written.
     def add_declaration!(property, value)
+      if value.nil? or value.empty?
+        @declarations.delete(property)
+        return
+      end
+      
       value.gsub!(/;\Z/, '')
       is_important = !value.gsub!(CssParser::IMPORTANT_IN_PROPERTY_RX, '').nil?
       property = property.downcase.strip
@@ -84,13 +89,14 @@ module CssParser
     end
 
     # Return all declarations as a string.
+    #--
+    # TODO: Clean-up regexp doesn't seem to work
+    #++
     def declarations_to_s(options = {})
      options = {:force_important => false}.merge(options)
      str = ''
-     each_declaration do |prop, val, is_important|
-       importance = (options[:force_important] || is_important) ? ' !important' : ''
-       str += "#{prop}: #{val}#{importance}; "
-     end 
+     importance = options[:force_important] ? ' !important' : ''
+     each_declaration { |prop, val| str += "#{prop}: #{val}#{importance}; " }
      str.gsub(/^[\s]+|[\n\r\f\t]*|[\s]+$/mx, '').strip
     end
 
@@ -138,6 +144,7 @@ private
       @selectors = selectors.split(',') 
     end
 
+public
     # Split shorthand dimensional declarations (e.g. <tt>margin: 0px auto;</tt>)
     # into their constituent parts.
     def expand_dimensions_shorthand! # :nodoc:
@@ -372,9 +379,5 @@ private
       end
 
     end
-
-
-
-
   end
 end

@@ -15,7 +15,7 @@ module CssParser
   # [<tt>import</tt>] Follow <tt>@import</tt> rules. Boolean, default is <tt>true</tt>.
   # [<tt>io_exceptions</tt>] Throw an exception if a link can not be found. Boolean, default is <tt>true</tt>.
   class Parser
-    USER_AGENT   = "Ruby CSS Parser/#{VERSION} (http://code.dunae.ca/css_parser/)"
+    USER_AGENT   = "Ruby CSS Parser/#{RUBY_VERSION} (http://code.dunae.ca/css_parser/)"
 
     STRIP_CSS_COMMENTS_RX = /\/\*.*?\*\//m
     STRIP_HTML_COMMENTS_RX = /\<\!\-\-|\-\-\>/m
