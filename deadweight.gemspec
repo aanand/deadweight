@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{deadweight}
-  s.version = "0.1.2"
+  s.version = "0.1.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aanand Prasad"]
-  s.date = %q{2009-12-15}
+  s.date = %q{2010-01-18}
   s.default_executable = %q{deadweight}
   s.email = %q{aanand.prasad@gmail.com}
   s.executables = ["deadweight"]
@@ -36,28 +36,25 @@ Gem::Specification.new do |s|
      "test/fixtures/style.css",
      "test/rake_task_test.rb",
      "test/test_helper.rb",
-     "vendor/gems/css_parser-0.9.1/CHANGELOG",
-     "vendor/gems/css_parser-0.9.1/LICENSE",
-     "vendor/gems/css_parser-0.9.1/README",
-     "vendor/gems/css_parser-0.9.1/lib/css_parser.rb",
-     "vendor/gems/css_parser-0.9.1/lib/css_parser/parser.rb",
-     "vendor/gems/css_parser-0.9.1/lib/css_parser/regexps.rb",
-     "vendor/gems/css_parser-0.9.1/lib/css_parser/rule_set.rb",
-     "vendor/gems/css_parser-0.9.1/test/fixtures/import-circular-reference.css",
-     "vendor/gems/css_parser-0.9.1/test/fixtures/import-with-media-types.css",
-     "vendor/gems/css_parser-0.9.1/test/fixtures/import1.css",
-     "vendor/gems/css_parser-0.9.1/test/fixtures/simple.css",
-     "vendor/gems/css_parser-0.9.1/test/fixtures/subdir/import2.css",
-     "vendor/gems/css_parser-0.9.1/test/test_css_parser_basic.rb",
-     "vendor/gems/css_parser-0.9.1/test/test_css_parser_downloading.rb",
-     "vendor/gems/css_parser-0.9.1/test/test_css_parser_media_types.rb",
-     "vendor/gems/css_parser-0.9.1/test/test_css_parser_misc.rb",
-     "vendor/gems/css_parser-0.9.1/test/test_css_parser_regexps.rb",
-     "vendor/gems/css_parser-0.9.1/test/test_helper.rb",
-     "vendor/gems/css_parser-0.9.1/test/test_merging.rb",
-     "vendor/gems/css_parser-0.9.1/test/test_rule_set.rb",
-     "vendor/gems/css_parser-0.9.1/test/test_rule_set_creating_shorthand.rb",
-     "vendor/gems/css_parser-0.9.1/test/test_rule_set_expanding_shorthand.rb"
+     "vendor/gems/css_parser-1.0.0/lib/css_parser.rb",
+     "vendor/gems/css_parser-1.0.0/lib/css_parser/parser.rb",
+     "vendor/gems/css_parser-1.0.0/lib/css_parser/regexps.rb",
+     "vendor/gems/css_parser-1.0.0/lib/css_parser/rule_set.rb",
+     "vendor/gems/css_parser-1.0.0/test/fixtures/import-circular-reference.css",
+     "vendor/gems/css_parser-1.0.0/test/fixtures/import-with-media-types.css",
+     "vendor/gems/css_parser-1.0.0/test/fixtures/import1.css",
+     "vendor/gems/css_parser-1.0.0/test/fixtures/simple.css",
+     "vendor/gems/css_parser-1.0.0/test/fixtures/subdir/import2.css",
+     "vendor/gems/css_parser-1.0.0/test/test_css_parser_basic.rb",
+     "vendor/gems/css_parser-1.0.0/test/test_css_parser_downloading.rb",
+     "vendor/gems/css_parser-1.0.0/test/test_css_parser_media_types.rb",
+     "vendor/gems/css_parser-1.0.0/test/test_css_parser_misc.rb",
+     "vendor/gems/css_parser-1.0.0/test/test_css_parser_regexps.rb",
+     "vendor/gems/css_parser-1.0.0/test/test_helper.rb",
+     "vendor/gems/css_parser-1.0.0/test/test_merging.rb",
+     "vendor/gems/css_parser-1.0.0/test/test_rule_set.rb",
+     "vendor/gems/css_parser-1.0.0/test/test_rule_set_creating_shorthand.rb",
+     "vendor/gems/css_parser-1.0.0/test/test_rule_set_expanding_shorthand.rb"
   ]
   s.homepage = %q{http://github.com/aanand/deadweight}
   s.rdoc_options = ["--charset=UTF-8"]
