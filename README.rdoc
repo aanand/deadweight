@@ -46,39 +46,47 @@ There's also experimental support for Lyndon (http://github.com/defunkt/lyndon) 
   dw.pages = %w( / /page/1 /about )
   puts dw.run
 
-=== Things to Note
+=== Setting the Root URL
 
-- You can tell it what URL root to use (rather than <tt>http://localhost:3000</tt>) by setting +root+.
-- It's completely dumb about any classes, IDs or tags that are only added by your Javascript layer, but you can filter them out by setting +ignore_selectors+.
-- You can optionally tell it to use Mechanize, and set up more complicated targets for scraping by specifying them as Procs.
-- If you have the <tt>colored</tt> gem installed, it'll spruce up the STDERR output.
+By default, Deadweight uses <tt>http://localhost:3000</tt> as the base URL for all paths. To change it, set +root+:
 
-=== A More Complex Example, In Light of All That
+  dw.root = "http://staging.example.com"      # staging server
+  dw.root = "http://example.com/staging-area" # urls can have paths in
+  dw.root = "/path/to/some/html"              # local paths work too
 
-  # lib/tasks/deadweight.rake
+=== What About Stuff Added by Javascript?
 
-  require 'deadweight'
+Deadweight is completely dumb about any classes, IDs or tags that are only added by your Javascript layer, but you can filter them out by setting +ignore_selectors+:
 
-  Deadweight::RakeTask.new do |dw|
-    dw.mechanize = true
+  dw.ignore_selectors = /hover|lightbox|superimposed_kittens/
 
-    dw.root = 'http://staging.example.com'
+=== You Can Use Mechanize for Complex Stuff
 
-    dw.stylesheets = %w( /stylesheets/style.css )
+Set +mechanize+ to +true+ and add a Proc to +pages+ (rather than a String), and Deadweight will execute it using Mechanize (http://mechanize.rubyforge.org/mechanize):
 
-    dw.pages = %w( / /page/1 /about )
+  dw.mechanize = true
 
-    dw.pages << proc {
-      fetch('/login')
-      form = agent.page.forms.first
-      form.username = 'username'
-      form.password = 'password'
-      agent.submit(form)
-      fetch('/secret-page')
-    }
+  # go through the login form to get to a protected URL
+  dw.pages << proc {
+    fetch('/login')
+    form = agent.page.forms.first
+    form.username = 'username'
+    form.password = 'password'
+    agent.submit(form)
+    fetch('/secret-page')
+  }
 
-    dw.ignore_selectors = /hover|lightbox|superimposed_kittens/
-  end
+  # use HTTP basic auth
+  dw.pages << proc {
+    agent.auth('username', 'password')
+    fetch('/other-secret-page')
+  }
+
+The +agent+ method returns the Mechanize instance. The +fetch+ method is a wrapper around +agent.get+ that will raise an exception in the event of an HTTP error status.
+
+=== If You Install <tt>colored</tt>, It'll Look Nicer
+
+  gem install colored
 
 == Copyright
 
