@@ -39,7 +39,11 @@ class Deadweight
     @unused_selectors.collect do |selector, declarations|
       # We test against the selector stripped of any pseudo classes,
       # but we report on the selector with its pseudo classes.
-      unless doc.search(strip(selector)).empty?
+      stripped_selector = strip(selector)
+
+      next if stripped_selector.empty?
+
+      if doc.search(stripped_selector).any?
         log.puts("  #{selector.green}")
         selector
       end
