@@ -8,13 +8,32 @@ Screencast!
 
 Ryan Bates has worked his magic once again. [Head over here for an excellent introduction to Deadweight](http://railscasts.com/episodes/180-finding-unused-css).
 
-Install It
-----------
+How to Use It
+-------------
 
-    gem install deadweight
+There are multiple ways to use Deadweight. It's designed to be completely agnostic of whatever framework (or, indeed language) your website is built on, but optimised for Ruby and Rails.
 
-Make a Rake Task
-----------------
+I'm going to tell you about the coolest way to use it first.
+
+### The Coolest Way to Use It ###
+
+Deadweight can hijack your Rails integration tests (both the spartan Test::Unit type and the refreshing Cucumber variety), capturing every page that is returned by your app during testing and saving you the trouble of manually specifying a ton of URLs and login processses. THIS IS PRETTY COOL YOU SHOULD TRY IT. (It's also somewhat new and untested, but you're the kind of person who just _loves_ it out here on the edge, I can tell.)
+
+Here's how it works. First, put this in your `Gemfile`:
+
+    group :test do
+      gem 'colored' # optional, in the same way that dressing respectably when you leave the house is 'optional'
+      gem 'deadweight', :require => 'deadweight/hijack/rails'
+    end
+
+Then, run your integration tests with the environment variable `DEADWEIGHT` set to `true`:
+
+    rake test DEADWEIGHT=true
+    rake cucumber DEADWEIGHT=true
+
+Let me know how it goes. It's not terribly customisable at the moment (you can't specify what exact stylesheets to look at, or what selectors to ignore). I'm looking for your feedback on how you'd like to be able to do that.
+
+### Or Make a Rake Task ###
 
     # lib/tasks/deadweight.rake
   
@@ -27,8 +46,7 @@ Make a Rake Task
 
 Running `rake deadweight` will output all unused rules, one per line. Note that it looks at `http://localhost:3000` by default, so you'll need to have `script/server` (or whatever your server command looks like) running.
 
-Or Run it From the Command Line
--------------------------------
+### Or Run it From the Command Line ###
 
     $ deadweight -s styles.css -s ie.css index.html about.html
     $ deadweight -s http://www.tigerbloodwins.com/index.css http://www.tigerbloodwins.com/
@@ -42,8 +60,7 @@ And you can use it as an HTTP proxy:
 
     $ deadweight -l deadweight.log -s styles.css -w http://github.com/ -P
 
-Or Call it Directly
--------------------
+### Or Call it Directly ###
 
     require 'deadweight'
   
