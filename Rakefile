@@ -1,21 +1,7 @@
-require 'rubygems'
-require 'rake'
-
-begin
-  require 'jeweler'
-  Jeweler::Tasks.new do |gem|
-    gem.name = "deadweight"
-    gem.summary = "A coverage tool for finding unused CSS"
-    gem.email = "aanand.prasad@gmail.com"
-    gem.homepage = "http://github.com/aanand/deadweight"
-    gem.authors = ["Aanand Prasad"]
-
-    gem.add_dependency('hpricot')
-  end
-
-  Jeweler::GemcutterTasks.new
-rescue LoadError
-  puts "Jeweler (or a dependency) not available. Install it with: sudo gem install jeweler"
+task :gem do
+  system "gem build deadweight.gemspec"
+  system "mkdir -p pkg"
+  system "mv deadweight-*.gem pkg"
 end
 
 require 'rake/testtask'

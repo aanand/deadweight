@@ -139,7 +139,7 @@ class Deadweight
 
       begin
         page = agent.get(loc)
-      rescue WWW::Mechanize::ResponseCodeError => e
+      rescue Mechanize::ResponseCodeError => e
         raise FetchError.new("#{loc} returned a response code of #{e.response_code}")
       end
 
@@ -178,7 +178,17 @@ private
   def initialize_agent
     begin
       require 'mechanize'
-      return WWW::Mechanize.new
+
+      unless defined?(Mechanize::VERSION) and Mechanize::VERSION >= "1.0.0"
+        log.puts %{
+          =================================================================
+          A mechanize version of 1.0.0 or above is required.
+          Install it like so: gem install mechanize
+          =================================================================
+        }
+      end
+
+      return Mechanize.new
     rescue LoadError
       log.puts %{
         =================================================================

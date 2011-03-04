@@ -1,0 +1,20 @@
+PATH
+  remote: .
+  specs:
+    deadweight (0.2.0)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    mechanize (1.0.0)
+      nokogiri (>= 1.2.1)
+    nokogiri (1.4.4)
+    shoulda (2.11.3)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  deadweight!
+  mechanize
+  shoulda
