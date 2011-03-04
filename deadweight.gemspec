@@ -9,6 +9,8 @@ Gem::Specification.new do |s|
   s.summary  = "A coverage tool for finding unused CSS"
   s.license  = 'MIT'
 
+  s.add_dependency 'nokogiri'
+
   s.add_development_dependency "shoulda"
   s.add_development_dependency "mechanize"
 

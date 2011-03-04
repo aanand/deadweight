@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     deadweight (0.2.0)
+      nokogiri
 
 GEM
   remote: http://rubygems.org/
@@ -17,4 +18,5 @@ PLATFORMS
 DEPENDENCIES
   deadweight!
   mechanize
+  nokogiri
   shoulda

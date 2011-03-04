@@ -1,7 +1,11 @@
 $LOAD_PATH.concat Dir.glob(File.expand_path('../../vendor/gems/*/lib', __FILE__))
 
+require 'rubygems'
+require 'bundler'
+Bundler.setup
+
 require 'css_parser'
-require 'hpricot'
+require 'nokogiri'
 require 'open-uri'
 
 begin
@@ -30,7 +34,7 @@ class Deadweight
   end
 
   def analyze(html)
-    doc = Hpricot(html)
+    doc = Nokogiri::HTML(html)
 
     @unused_selectors.collect do |selector, declarations|
       # We test against the selector stripped of any pseudo classes,
