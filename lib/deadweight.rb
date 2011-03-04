@@ -66,8 +66,7 @@ class Deadweight
     selector_count
   end
 
-  # Find all unused CSS selectors and return them as an array.
-  def run
+  def reset!
     @parsed_rules     = {}
     @unused_selectors = []
 
@@ -82,7 +81,18 @@ class Deadweight
       log.puts("Added #{new_selector_count} extra selectors".yellow)
     end
 
-    total_selectors = @unused_selectors.size
+    @total_selectors = @unused_selectors.size
+  end
+
+  def report
+    log.puts
+    log.puts "found #{@unused_selectors.size} unused selectors out of #{@total_selectors} total".yellow
+    log.puts
+  end
+
+  # Find all unused CSS selectors and return them as an array.
+  def run
+    reset!
 
     pages.each do |page|
       log.puts
@@ -110,9 +120,7 @@ class Deadweight
       process!(html)
     end
 
-    log.puts
-    log.puts "found #{@unused_selectors.size} unused selectors out of #{total_selectors} total".yellow
-    log.puts
+    report
 
     @unused_selectors
   end
