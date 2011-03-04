@@ -1,8 +1,8 @@
-$LOAD_PATH.concat Dir.glob(File.expand_path('../../vendor/gems/*/lib', __FILE__))
-
 require 'rubygems'
 require 'bundler'
 Bundler.setup
+
+$LOAD_PATH.concat Dir.glob(File.expand_path('../../vendor/gems/*/lib', __FILE__))
 
 require 'css_parser'
 require 'nokogiri'
