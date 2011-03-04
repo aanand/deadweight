@@ -15,19 +15,15 @@ module CssParser
   # [<tt>import</tt>] Follow <tt>@import</tt> rules. Boolean, default is <tt>true</tt>.
   # [<tt>io_exceptions</tt>] Throw an exception if a link can not be found. Boolean, default is <tt>true</tt>.
   class Parser
-    USER_AGENT   = "Ruby CSS Parser/#{RUBY_VERSION} (http://code.dunae.ca/css_parser/)"
+    USER_AGENT   = "Ruby CSS Parser/#{CssParser::VERSION} (http://github.com/alexdunae/css_parser)"
 
     STRIP_CSS_COMMENTS_RX = /\/\*.*?\*\//m
     STRIP_HTML_COMMENTS_RX = /\<\!\-\-|\-\-\>/m
 
     # Initial parsing
-    RE_AT_IMPORT_RULE = /\@import[\s]+(url\()?["']+(.[^'"]*)["']\)?([\w\s\,]*);?/i
+    RE_AT_IMPORT_RULE = /\@import\s*(?:url\s*)?(?:\()?(?:\s*)["']?([^'"\s\)]*)["']?\)?([\w\s\,^\])]*)\)?[;\n]?/
 
-    #--
-    # RE_AT_IMPORT_RULE = Regexp.new('@import[\s]*(' + RE_STRING.to_s + ')([\w\s\,]*)[;]?', Regexp::IGNORECASE) -- should handle url() even though it is not allowed
-    #++
-
-    # Array of CSS files that have been loaded.
+     # Array of CSS files that have been loaded.
     attr_reader   :loaded_uris
 
     #attr_reader   :rules
@@ -82,6 +78,13 @@ module CssParser
 
     # Add a raw block of CSS.
     #
+    # In order to follow +@import+ rules you must supply either a
+    # +:base_dir+ or +:base_uri+ option.
+    #
+    # Use the +:media_types+ option to set the media type(s) for this block.  Takes an array of symbols.
+    #
+    # Use the +:only_media_types+ option to selectively follow +@import+ rules.  Takes an array of symbols.
+    #
     # ==== Example
     #   css = <<-EOT
     #     body { font-size: 10pt }
@@ -92,21 +95,43 @@ module CssParser
     #   EOT
     #
     #   parser = CssParser::Parser.new
-    #   parser.load_css!(css)
-    #--
-    # TODO: add media_type
-    #++
+    #   parser.add_block!(css)
     def add_block!(block, options = {})
-      options = {:base_uri => nil, :charset => nil, :media_types => :all}.merge(options)
-      
+      options = {:base_uri => nil, :base_dir => nil, :charset => nil, :media_types => :all, :only_media_types => :all}.merge(options)
+      options[:media_types] = [options[:media_types]].flatten
+      options[:only_media_types] = [options[:only_media_types]].flatten
+
       block = cleanup_block(block)
 
       if options[:base_uri] and @options[:absolute_paths]
         block = CssParser.convert_uris(block, options[:base_uri])
       end
+
+      # Load @imported CSS
+      block.scan(RE_AT_IMPORT_RULE).each do |import_rule|    
+        media_types = []
+        if media_string = import_rule[-1]
+          media_string.split(/\s|\,/).each do |t|
+            media_types << t.to_sym unless t.empty?
+          end
+        end
+              
+        next unless options[:only_media_types].include?(:all) or media_types.length < 1 or (media_types & options[:only_media_types]).length > 0
+
+        import_path = import_rule[0].to_s.gsub(/['"]*/, '').strip
+
+        if options[:base_uri]
+          import_uri = URI.parse(options[:base_uri].to_s).merge(import_path)
+          load_uri!(import_uri, options[:base_uri], media_types)
+        elsif options[:base_dir]
+          load_file!(import_path, options[:base_dir], media_types)
+        end     
+      end
+
+      # Remove @import declarations
+      block.gsub!(RE_AT_IMPORT_RULE, '')
       
       parse_block_into_rule_sets!(block, options)
-      
     end
 
     # Add a CSS rule by setting the +selectors+, +declarations+ and +media_types+.
@@ -175,7 +200,7 @@ module CssParser
       options = {:media_types => :all}.merge(options)
       media_types = options[:media_types]
 
-      in_declarations = false
+      in_declarations = 0
 
       block_depth = 0
 
@@ -195,13 +220,25 @@ module CssParser
           in_string = !in_string
         end       
 
-        if in_declarations
+        if in_declarations > 0
+
+          # too deep, malformed declaration block
+          if in_declarations > 1
+            in_declarations -= 1 if token =~ /\}/
+            next
+          end
+          
+          if token =~ /\{/
+            in_declarations += 1
+            next
+          end
+        
           current_declarations += token
 
           if token =~ /\}/ and not in_string
             current_declarations.gsub!(/\}[\s]*$/, '')
             
-            in_declarations = false
+            in_declarations -= 1
 
             unless current_declarations.strip.empty?
               #puts "SAVING #{current_selectors} -> #{current_declarations}"
@@ -233,7 +270,7 @@ module CssParser
             if token =~ /\{/ and not in_string
               current_selectors.gsub!(/^[\s]*/, '')
               current_selectors.gsub!(/[\s]*$/, '')
-              in_declarations = true
+              in_declarations += 1
             else
               current_selectors += token
             end
@@ -243,35 +280,35 @@ module CssParser
     end
 
     # Load a remote CSS file.
+    #
+    # You can also pass in file://test.css
     def load_uri!(uri, base_uri = nil, media_types = :all)
+      uri = URI.parse(uri) unless uri.respond_to? :scheme
+      if uri.scheme == 'file' or uri.scheme.nil?
+        uri.path = File.expand_path(uri.path)
+        uri.scheme = 'file'
+      end
       base_uri = uri if base_uri.nil?
+
       src, charset = read_remote_file(uri)
 
-      # Load @imported CSS
-      src.scan(RE_AT_IMPORT_RULE).each do |import_rule|        
-        import_path = import_rule[1].to_s.gsub(/['"]*/, '').strip
-        import_uri = URI.parse(base_uri.to_s).merge(import_path)
-        #puts import_uri.to_s
-
-        media_types = []
-        if media_string = import_rule[import_rule.length-1]
-          media_string.split(/\s|\,/).each do |t|
-            media_types << t.to_sym unless t.empty?
-          end
-        end
-
-        # Recurse
-        load_uri!(import_uri, nil, media_types)
+      if src
+        add_block!(src, {:media_types => media_types, :base_uri => base_uri})
       end
-
-      # Remove @import declarations
-      src.gsub!(RE_AT_IMPORT_RULE, '')
-
-      # Relative paths need to be converted here
-      src = CssParser.convert_uris(src, base_uri) if base_uri and @options[:absolute_paths]
-
-      add_block!(src, {:media_types => media_types})
     end
+    
+    # Load a local CSS file.
+    def load_file!(file_name, base_dir = nil, media_types = :all)
+      file_name = File.expand_path(file_name, base_dir)
+      return unless File.readable?(file_name)
+
+      src = IO.read(file_name)
+      base_dir = File.dirname(file_name)
+
+      add_block!(src, {:media_types => media_types, :base_dir => base_dir})
+    end
+    
+    
 
   protected
     # Strip comments and clean up blank lines from a block of CSS.
@@ -298,30 +335,59 @@ module CssParser
     # TODO: add option to fail silently or throw and exception on a 404
     #++
     def read_remote_file(uri) # :nodoc:
-      raise CircularReferenceError, "can't load #{uri.to_s} more than once" if @loaded_uris.include?(uri.to_s)
-      @loaded_uris << uri.to_s
-
-      begin
-      #fh = open(uri, 'rb')
-        fh = open(uri, 'rb', 'User-Agent' => USER_AGENT, 'Accept-Encoding' => 'gzip')
-
-        if fh.content_encoding.include?('gzip')
-          remote_src = Zlib::GzipReader.new(fh).read
-        else
-          remote_src = fh.read
-        end
-
-        #puts "reading #{uri} (#{fh.charset})"
-
-        ic = Iconv.new('UTF-8//IGNORE', fh.charset)
-        src = ic.iconv(remote_src)
-
-        fh.close
-        return src, fh.charset
-      rescue
-        raise RemoteFileError if @options[:io_exceptions]
+      if @loaded_uris.include?(uri.to_s)
+        raise CircularReferenceError, "can't load #{uri.to_s} more than once" if @options[:io_exceptions]
         return '', nil
       end
+
+      @loaded_uris << uri.to_s
+
+      src = '', charset = nil
+
+      begin
+        uri = URI.parse(uri.to_s)    
+        http = Net::HTTP.new(uri.host, uri.port)
+
+        if uri.scheme == 'file'
+          # local file
+          fh = open(uri.path, 'rb')
+          src = fh.read
+          fh.close
+        else
+          # remote file
+          if uri.scheme == 'https'
+            http.use_ssl = true 
+            http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+          end
+
+          res, src = http.get(uri.path, {'User-Agent' => USER_AGENT, 'Accept-Encoding' => 'gzip'})
+          charset = fh.respond_to?(:charset) ? fh.charset : 'utf-8'
+
+          if res.code.to_i >= 400
+            raise RemoteFileError if @options[:io_exceptions]
+            return '', nil
+          end
+
+          case res['content-encoding']
+            when 'gzip'
+              io = Zlib::GzipReader.new(StringIO.new(res.body))
+              src = io.read
+            when 'deflate'
+              io = Zlib::Inflate.new
+              src = io.inflate(res.body)
+          end
+        end
+
+        if charset
+          ic = Iconv.new('UTF-8//IGNORE', charset)
+          src = ic.iconv(src)
+        end
+      rescue
+        raise RemoteFileError if @options[:io_exceptions]
+        return nil, nil
+      end
+
+      return src, charset  
     end
 
   private

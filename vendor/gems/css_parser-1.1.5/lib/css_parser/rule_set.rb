@@ -14,6 +14,7 @@ module CssParser
       @selectors = []
       @specificity = specificity
       @declarations = {}
+      @order = 0
       parse_selectors!(selectors) if selectors
       parse_declarations!(block)
     end
@@ -57,7 +58,9 @@ module CssParser
       is_important = !value.gsub!(CssParser::IMPORTANT_IN_PROPERTY_RX, '').nil?
       property = property.downcase.strip
       #puts "SAVING #{property}  #{value} #{is_important.inspect}"
-      @declarations[property] = {:value => value, :is_important => is_important}
+      @declarations[property] = {
+        :value => value, :is_important => is_important, :order => @order += 1
+      }
     end
     alias_method :[]=, :add_declaration!
 
@@ -81,9 +84,9 @@ module CssParser
 
     # Iterate through declarations.
     def each_declaration # :yields: property, value, is_important
-      @declarations.each do |property, data|
+      decs = @declarations.sort { |a,b| a[1][:order].nil? || b[1][:order].nil? ? 0 : a[1][:order] <=> b[1][:order] }
+      decs.each do |property, data|
         value = data[:value]
-        #value += ' !important' if data[:is_important]
         yield property.downcase.strip, value.strip, data[:is_important]
       end
     end
@@ -95,8 +98,10 @@ module CssParser
     def declarations_to_s(options = {})
      options = {:force_important => false}.merge(options)
      str = ''
-     importance = options[:force_important] ? ' !important' : ''
-     each_declaration { |prop, val| str += "#{prop}: #{val}#{importance}; " }
+     each_declaration do |prop, val, is_important|
+       importance = (options[:force_important] || is_important) ? ' !important' : ''
+       str += "#{prop}: #{val}#{importance}; "
+     end
      str.gsub(/^[\s]+|[\n\r\f\t]*|[\s]+$/mx, '').strip
     end
 
@@ -154,6 +159,7 @@ public
         
         value = @declarations[property][:value]
         is_important = @declarations[property][:is_important]
+        order = @declarations[property][:order]
         t, r, b, l = nil
 
         matches = value.scan(CssParser::BOX_MODEL_UNITS_RX)
@@ -175,10 +181,11 @@ public
             l = matches[3][0]
         end
 
-        @declarations["#{property}-top"] = {:value => t.to_s, :is_important => is_important}
-        @declarations["#{property}-right"] = {:value => r.to_s, :is_important => is_important}
-        @declarations["#{property}-bottom"] = {:value => b.to_s, :is_important => is_important}
-        @declarations["#{property}-left"] = {:value => l.to_s, :is_important => is_important}
+        values = { :is_important => is_important, :order => order }
+        @declarations["#{property}-top"]    = values.merge(:value => t.to_s)
+        @declarations["#{property}-right"]  = values.merge(:value => r.to_s)
+        @declarations["#{property}-bottom"] = values.merge(:value => b.to_s)
+        @declarations["#{property}-left"]   = values.merge(:value => l.to_s)
         @declarations.delete(property)
       end
     end
@@ -198,6 +205,7 @@ public
 
       value = @declarations['font'][:value]
       is_important = @declarations['font'][:is_important]
+      order = @declarations['font'][:order]
 
       in_fonts = false
 
@@ -232,7 +240,7 @@ public
         end
       end
 
-      font_props.each { |font_prop, font_val| @declarations[font_prop] = {:value => font_val, :is_important => is_important} }
+      font_props.each { |font_prop, font_val| @declarations[font_prop] = {:value => font_val, :is_important => is_important, :order => order} }
 
       @declarations.delete('font')
     end
@@ -247,6 +255,7 @@ public
 
       value = @declarations['background'][:value]
       is_important = @declarations['background'][:is_important]
+      order = @declarations['background'][:order]
 
       bg_props = {}
 
@@ -283,7 +292,7 @@ public
         end
       end
 
-      bg_props.each { |bg_prop, bg_val| @declarations[bg_prop] = {:value => bg_val, :is_important => is_important} }
+      bg_props.each { |bg_prop, bg_val| @declarations[bg_prop] = {:value => bg_val, :is_important => is_important, :order => order} }
 
       @declarations.delete('background')
     end
@@ -291,11 +300,13 @@ public
 
     # Looks for long format CSS background properties (e.g. <tt>background-color</tt>) and 
     # converts them into a shorthand CSS <tt>background</tt> property.
+    #
+    # Leaves properties declared !important alone.
     def create_background_shorthand! # :nodoc:
       new_value = ''
       ['background-color', 'background-image', 'background-repeat', 
        'background-position', 'background-attachment'].each do |property|
-        if @declarations.has_key?(property)
+        if @declarations.has_key?(property) and not @declarations[property][:is_important]
           new_value += @declarations[property][:value] + ' '
           @declarations.delete(property)
         end

@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/test_helper'
+require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 require "set"
 
 # Test cases for parsing CSS blocks
@@ -60,8 +60,23 @@ class RuleSetTests < Test::Unit::TestCase
     assert_equal(expected, actual)
   end
 
+  def test_each_declaration_respects_order
+    css_fragment = "margin: 0; padding: 20px; margin-bottom: 28px;"
+    rs           = RuleSet.new(nil, css_fragment)
+    expected     = %w(margin padding margin-bottom)
+    actual       = []
+    rs.each_declaration { |prop, val, imp| actual << prop }
+    assert_equal(expected, actual)
+  end
+
   def test_declarations_to_s
     declarations = 'color: #fff; font-weight: bold;'
+    rs = RuleSet.new('#content p, a', declarations)
+    assert_equal(declarations.split(' ').sort, rs.declarations_to_s.split(' ').sort)
+  end
+
+  def test_important_declarations_to_s
+    declarations = 'color: #fff; font-weight: bold !important;'
     rs = RuleSet.new('#content p, a', declarations)
     assert_equal(declarations.split(' ').sort, rs.declarations_to_s.split(' ').sort)
   end

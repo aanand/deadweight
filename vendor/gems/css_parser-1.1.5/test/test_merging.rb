@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/test_helper'
+require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 
 class MergingTests < Test::Unit::TestCase
   include CssParser
@@ -85,4 +85,19 @@ class MergingTests < Test::Unit::TestCase
     merged = CssParser.merge(rs)
     assert_equal rs.object_id, merged.object_id
   end
+  
+  def test_merging_important
+    rs1 = RuleSet.new(nil, 'color: black !important;')
+    rs2 = RuleSet.new(nil, 'color: red;')
+    merged = CssParser.merge(rs1, rs2)
+    assert_equal 'black !important;', merged['color']    
+  end
+
+  def test_merging_shorthand_important
+    rs1 = RuleSet.new(nil, 'background: black none !important;')
+    rs2 = RuleSet.new(nil, 'background-color: red;')
+    merged = CssParser.merge(rs1, rs2)
+    assert_equal 'black !important;', merged['background-color']
+  end
+
 end

@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/test_helper'
+require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 
 # Test cases for the CssParser.
 class CssParserTests < Test::Unit::TestCase
@@ -83,7 +83,6 @@ class CssParserTests < Test::Unit::TestCase
   end
 
   def test_ignoring_malformed_declarations
-    flunk
     # dervived from http://www.w3.org/TR/CSS21/syndata.html#parsing-errors
     css = <<-EOT
       p { color:green }

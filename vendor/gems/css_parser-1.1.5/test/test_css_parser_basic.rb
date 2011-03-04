@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/test_helper'
+require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 
 # Test cases for reading and generating CSS shorthand properties
 class CssParserBasicTests < Test::Unit::TestCase
@@ -10,6 +10,7 @@ class CssParserBasicTests < Test::Unit::TestCase
       html, body, p { margin: 0px; }
       p { padding: 0px; }
       #content { font: 12px/normal sans-serif; }
+      .content { color: red; }
     EOT
   end
 
@@ -17,6 +18,8 @@ class CssParserBasicTests < Test::Unit::TestCase
     @cp.add_block!(@css)
     assert_equal 'margin: 0px;', @cp.find_by_selector('body').join(' ')
     assert_equal 'margin: 0px; padding: 0px;', @cp.find_by_selector('p').join(' ')
+    assert_equal 'font: 12px/normal sans-serif;', @cp.find_by_selector('#content').join(' ')
+    assert_equal 'color: red;', @cp.find_by_selector('.content').join(' ')
   end
 
   def test_adding_block

@@ -1,5 +1,5 @@
 # coding: iso-8859-1
-require File.dirname(__FILE__) + '/test_helper'
+require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 
 # Test cases for CSS regular expressions
 #

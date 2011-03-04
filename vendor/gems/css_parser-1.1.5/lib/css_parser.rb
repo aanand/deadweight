@@ -1,13 +1,14 @@
-$:.unshift File.dirname(__FILE__)
 require 'uri'
+require 'net/https'
+require 'open-uri'
 require 'digest/md5'
 require 'zlib'
+require 'stringio'
 require 'iconv'
-require 'css_parser/rule_set'
-require 'css_parser/regexps'
-require 'css_parser/parser'
 
 module CssParser
+  VERSION = '1.1.5'
+
   # Merge multiple CSS RuleSets by cascading according to the CSS 2.1 cascading rules 
   # (http://www.w3.org/TR/REC-CSS2/cascade.html#cascading-order).
   #
@@ -74,20 +75,28 @@ module CssParser
 
       rule_set.each_declaration do |property, value, is_important|
         # Add the property to the list to be folded per http://www.w3.org/TR/CSS21/cascade.html#cascading-order
-        if not properties.has_key?(property) or
-               is_important or # step 2
-               properties[property][:specificity] < specificity or # step 3
-               properties[property][:specificity] == specificity # step 4    
-          properties[property] = {:value => value, :specificity => specificity, :is_important => is_important}            
+        if not properties.has_key?(property)
+          properties[property] = {:value => value, :specificity => specificity, :is_important => is_important}
+        elsif properties[property][:specificity] < specificity or properties[property][:specificity] == specificity
+          unless properties[property][:is_important]
+            properties[property] = {:value => value, :specificity => specificity, :is_important => is_important}            
+          end
         end
+
+        if is_important
+            properties[property] = {:value => value, :specificity => specificity, :is_important => is_important}            
+        end        
       end
     end
 
     merged = RuleSet.new(nil, nil)
 
-    # TODO: what about important
     properties.each do |property, details|
-      merged[property.strip] = details[:value].strip
+      if details[:is_important]
+        merged[property.strip] = details[:value].strip.gsub(/\;\Z/, '') + '!important' 
+      else
+        merged[property.strip] = details[:value].strip
+      end
     end
 
     merged.create_shorthand!
@@ -147,3 +156,7 @@ module CssParser
     out
   end
 end
+
+require File.dirname(__FILE__) + '/css_parser/rule_set'
+require File.dirname(__FILE__) + '/css_parser/regexps'
+require File.dirname(__FILE__) + '/css_parser/parser'
