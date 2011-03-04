@@ -31,6 +31,8 @@ Or Run it From the Command Line
 -------------------------------
 
     $ deadweight -s styles.css -s ie.css index.html about.html
+    $ deadweight -s http://www.tigerbloodwins.com/index.css http://www.tigerbloodwins.com/
+    $ deadweight --root http://kottke.org/ -s '/templates/2009/css.php?p=mac' / /everfresh /about
 
 You can pipe in CSS rules from STDIN:
 
