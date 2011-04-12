@@ -24,6 +24,7 @@ rescue LoadError
   end
 end
 
+desc "Build documentation"
 task :doc do
   system "yard"
 end

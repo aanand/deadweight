@@ -8,21 +8,30 @@ Screencast!
 
 Ryan Bates has worked his magic once again. [Head over here for an excellent introduction to Deadweight](http://railscasts.com/episodes/180-finding-unused-css).
 
+How to Install It
+-----------------
+
+    $ gem install deadweight
+
 How to Use It
 -------------
 
-There are multiple ways to use Deadweight. It's designed to be completely agnostic of whatever framework (or, indeed language) your website is built on, but optimised for Ruby and Rails.
+There are multiple ways to use Deadweight. It's designed to be completely agnostic of whatever framework (or indeed language) your website is built on, but optimised for Ruby and Rails.
 
-I'm going to tell you about the coolest way to use it first.
+### Run it From the Command Line ###
 
-### The Coolest Way to Use It ###
+    $ deadweight -s styles.css -s ie.css index.html about.html
+    $ deadweight -s http://www.tigerbloodwins.com/index.css http://www.tigerbloodwins.com/
+    $ deadweight --root http://kottke.org/ -s '/templates/2009/css.php?p=mac' / /everfresh /about
 
-Deadweight can hijack your Rails integration tests (both the spartan Test::Unit type and the refreshing Cucumber variety), capturing every page that is returned by your app during testing and saving you the trouble of manually specifying a ton of URLs and login processses. THIS IS PRETTY COOL YOU SHOULD TRY IT. (It's also somewhat new and untested, but you're the kind of person who just _loves_ it out here on the edge, I can tell.)
+### Integrate it With Your Integration Tests ###
 
-Here's how it works. First, put this in your `Gemfile`:
+Deadweight can hijack your Rails integration tests (both the spartan Test::Unit type and the refreshing Cucumber variety), capturing every page that is returned by your app during testing and saving you the trouble of manually specifying a ton of URLs and login processses.
+
+First, put this in your `Gemfile`:
 
     group :test do
-      gem 'colored' # optional, in the same way that dressing respectably when you leave the house is 'optional'
+      gem 'colored'
       gem 'deadweight', :require => 'deadweight/hijack/rails'
     end
 
@@ -33,41 +42,35 @@ Then, run your integration tests with the environment variable `DEADWEIGHT` set 
 
 Let me know how it goes. It's not terribly customisable at the moment (you can't specify what exact stylesheets to look at, or what selectors to ignore). I'm looking for your feedback on how you'd like to be able to do that.
 
-### Or Make a Rake Task ###
+### Rake Task ###
 
     # lib/tasks/deadweight.rake
   
     require 'deadweight'
   
     Deadweight::RakeTask.new do |dw|
-      dw.stylesheets = %w( /stylesheets/style.css )
-      dw.pages = %w( / /page/1 /about )
+      dw.stylesheets = ["/stylesheets/style.css"]
+      dw.pages = ["/", "/page/1", "/about"]
     end
 
 Running `rake deadweight` will output all unused rules, one per line. Note that it looks at `http://localhost:3000` by default, so you'll need to have `script/server` (or whatever your server command looks like) running.
 
-### Or Run it From the Command Line ###
-
-    $ deadweight -s styles.css -s ie.css index.html about.html
-    $ deadweight -s http://www.tigerbloodwins.com/index.css http://www.tigerbloodwins.com/
-    $ deadweight --root http://kottke.org/ -s '/templates/2009/css.php?p=mac' / /everfresh /about
-
-You can pipe in CSS rules from STDIN:
-
-    $ cat styles.css | deadweight index.html
-
-And you can use it as an HTTP proxy:
-
-    $ deadweight -l deadweight.log -s styles.css -w http://github.com/ -P
-
-### Or Call it Directly ###
+### Call it Directly from Ruby ###
 
     require 'deadweight'
   
     dw = Deadweight.new
-    dw.stylesheets = %w( /stylesheets/style.css )
-    dw.pages = %w( / /page/1 /about )
+    dw.stylesheets = ["/stylesheets/style.css"]
+    dw.pages = ["/", "/page/1", "/about"]
     puts dw.run
+
+### Pipe In CSS Rules from STDIN ###
+
+    $ cat styles.css | deadweight index.html
+
+### Use it as an HTTP Proxy ###
+
+    $ deadweight -l deadweight.log -s styles.css -w http://github.com/ -P
 
 Setting the Root URL
 --------------------
