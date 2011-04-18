@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name     = "deadweight"
-  s.version  = "0.2.0"
+  s.version  = "0.2.1"
   s.authors  = ["Aanand Prasad"]
   s.email    = "aanand.prasad@gmail.com"
   s.homepage = "http://github.com/aanand/deadweight"
