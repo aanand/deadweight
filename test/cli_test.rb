@@ -1,4 +1,4 @@
-require 'test_helper'
+require File.expand_path(File.join(File.dirname(__FILE__), "test_helper"))
 
 class CliTest < Test::Unit::TestCase
   COMMAND      = "ruby -rubygems -Ilib bin/deadweight"
