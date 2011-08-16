@@ -19,6 +19,7 @@ class DeadweightTest < Test::Unit::TestCase
     should "have the same attributes" do
       assert_equal(@dw.log_file,    @dwb.log_file)
       assert_equal(@dw.root,        @dwb.root)
+      assert_equal(@dw.media_root,  @dwb.media_root)
       assert_equal(@dw.stylesheets, @dwb.stylesheets)
       assert_equal(@dw.pages,       @dwb.pages)
     end
