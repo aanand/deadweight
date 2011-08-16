@@ -23,6 +23,7 @@ There are multiple ways to use Deadweight. It's designed to be completely agnost
     $ deadweight -s styles.css -s ie.css index.html about.html
     $ deadweight -s http://www.tigerbloodwins.com/index.css http://www.tigerbloodwins.com/
     $ deadweight --root http://kottke.org/ -s '/templates/2009/css.php?p=mac' / /everfresh /about
+    $ deadweight --root http://myserver.com/ --media_root http://media.myserver.com -s '/perfect_css.css' / /bio
 
 ### Integrate it With Your Integration Tests ###
 
@@ -45,9 +46,9 @@ Let me know how it goes. It's not terribly customisable at the moment (you can't
 ### Rake Task ###
 
     # lib/tasks/deadweight.rake
-  
+
     require 'deadweight'
-  
+
     Deadweight::RakeTask.new do |dw|
       dw.stylesheets = ["/stylesheets/style.css"]
       dw.pages = ["/", "/page/1", "/about"]
@@ -58,7 +59,7 @@ Running `rake deadweight` will output all unused rules, one per line. Note that 
 ### Call it Directly from Ruby ###
 
     require 'deadweight'
-  
+
     dw = Deadweight.new
     dw.stylesheets = ["/stylesheets/style.css"]
     dw.pages = ["/", "/page/1", "/about"]
@@ -80,6 +81,11 @@ By default, Deadweight uses `http://localhost:3000` as the base URL for all path
     dw.root = "http://staging.example.com"      # staging server
     dw.root = "http://example.com/staging-area" # urls can have paths in
     dw.root = "/path/to/some/html"              # local paths work too
+
+The `media root` attribute can be used for situations where CSS is being
+served on a different doamin than the HTML:
+
+    dw.media_root = "http://media.example.com"
 
 What About Stuff Added by Javascript?
 -------------------------------------
