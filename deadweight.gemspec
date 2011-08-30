@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "shoulda"
   s.add_development_dependency "mechanize"
+  s.add_development_dependency "rake"
 
   s.files        = `git ls-files LICENSE README.md bin lib vendor`.split
   s.require_path = 'lib'

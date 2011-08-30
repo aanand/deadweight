@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    deadweight (0.2.0)
+    deadweight (0.2.1)
       nokogiri
 
 GEM
@@ -10,6 +10,7 @@ GEM
     mechanize (1.0.0)
       nokogiri (>= 1.2.1)
     nokogiri (1.4.4)
+    rake (0.9.2)
     shoulda (2.11.3)
 
 PLATFORMS
@@ -18,5 +19,5 @@ PLATFORMS
 DEPENDENCIES
   deadweight!
   mechanize
-  nokogiri
+  rake
   shoulda
