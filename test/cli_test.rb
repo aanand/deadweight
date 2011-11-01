@@ -9,7 +9,7 @@ class CliTest < Test::Unit::TestCase
   end
 
   should "accept CSS rules on STDIN" do
-    assert_equal "hello\n", `echo hello | cat`
+    assert_equal "31\n", `echo ".something { display: block; }" | ruby -e 'puts STDIN.stat.size'`
     output = `echo ".something { display: block; }" | #{FULL_COMMAND}`
     assert output.include?('.something'), "output should have included '.something' but was:\n#{output}"
   end
