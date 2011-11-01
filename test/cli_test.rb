@@ -9,7 +9,8 @@ class CliTest < Test::Unit::TestCase
   end
 
   should "accept CSS rules on STDIN" do
-    assert `echo ".something { display: block; }" | #{FULL_COMMAND}`.include?('.something')
+    output = `echo ".something { display: block; }" | #{FULL_COMMAND}`
+    assert output.include?('.something'), "output should have included '.something' but was:\n#{output}"
   end
 
   should "accept a [-r | --root] argument and relative paths" do
