@@ -8,10 +8,13 @@ class CliTest < Test::Unit::TestCase
     assert_correct_selectors_in_output(`#{FULL_COMMAND}`)
   end
 
-  should "accept CSS rules on STDIN" do
-    assert_equal "31\n", `echo ".something { display: block; }" | ruby -e 'puts STDIN.stat.size'`
-    output = `echo ".something { display: block; }" | #{FULL_COMMAND}`
-    assert output.include?('.something'), "output should have included '.something' but was:\n#{output}"
+  if `echo "hello" | ruby -e 'puts STDIN.stat.size'` == "6\n"
+    should "accept CSS rules on STDIN" do
+      output = `echo ".something { display: block; }" | #{FULL_COMMAND}`
+      assert output.include?('.something'), "output should have included '.something' but was:\n#{output}"
+    end
+  else
+    should_eventually "accept CSS rules on STDIN, but pipes and backticks don't seem to play together well on this machine"
   end
 
   should "accept a [-r | --root] argument and relative paths" do
