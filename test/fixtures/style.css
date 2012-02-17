@@ -22,3 +22,9 @@
 #rab:hover::selection {
     color: black;
 }
+
+input#fancy:nth-child(2):not(#z.o[type='file']) {
+    color: red;
+}
+
+@-webkit-keyframes rainbow {}
