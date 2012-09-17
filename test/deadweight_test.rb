@@ -37,6 +37,12 @@ class DeadweightTest < Test::Unit::TestCase
 
     # #rab:hover::selection (#rab does not exist)
     assert @result.include?('#rab:hover::selection')
+
+    # input#fancy:nth-child(2):not(#z.o[type='file']) (input#fancy does exist)
+    assert !@result.include?("input#fancy:nth-child(2):not(#z.o[type='file'])")
+
+    # @-webkit-keyframes (ignore)
+    assert !@result.include?("@-webkit-keyframes")
   end
 
   should "accept Procs as targets" do
