@@ -10,9 +10,10 @@ Gem::Specification.new do |s|
   s.license  = 'MIT'
 
   s.add_dependency 'nokogiri'
+  s.add_dependency 'css_parser', '~> 1.2.6'
 
   s.add_development_dependency "shoulda"
-  s.add_development_dependency "mechanize"
+  s.add_development_dependency "mechanize", "~> 2.5.1"
   s.add_development_dependency "rake"
 
   s.files        = `git ls-files LICENSE README.md bin lib vendor`.split
