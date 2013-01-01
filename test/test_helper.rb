@@ -9,6 +9,7 @@ require 'deadweight'
 class Test::Unit::TestCase
   UNUSED_SELECTORS = ['#foo .bar .baz']
   USED_SELECTORS   = ['#foo', '#foo .bar']
+  ERROR_SELECTORS  = ['* :click']
 
   def self.should_correctly_report_selectors
     should "report unused selectors" do
@@ -17,6 +18,10 @@ class Test::Unit::TestCase
 
     should "not report used selectors" do
       assert_does_not_report_used_selectors(@result)
+    end
+
+    should "report errored selectors" do
+      assert_reports_error_selectors(@result)
     end
   end
 
@@ -28,6 +33,12 @@ class Test::Unit::TestCase
 
   def assert_reports_unused_selectors(output)
     UNUSED_SELECTORS.each do |s|
+      assert output.include?(s), "output is missing #{s.inspect}:\n#{output}"
+    end
+  end
+
+  def assert_reports_error_selectors(output)
+    ERROR_SELECTORS.each do |s|
       assert output.include?(s), "output is missing #{s.inspect}:\n#{output}"
     end
   end

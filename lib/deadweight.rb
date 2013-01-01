@@ -22,6 +22,7 @@ class Deadweight
     @pages = []
     @rules = ""
     @ignore_selectors = []
+    @error_selectors = []
     @mechanize = false
     @log_file = STDERR
     yield self and run if block_given?
@@ -37,9 +38,14 @@ class Deadweight
 
       next if stripped_selector.empty?
 
-      if doc.search(stripped_selector).any?
-        log.puts("  #{selector.green}")
-        selector
+      begin
+        if doc.search(stripped_selector).any?
+          log.puts("  #{selector.green}")
+          selector
+        end
+      rescue Nokogiri::CSS::SyntaxError => e
+        log.puts("  #{selector.red}")
+        @error_selectors << selector
       end
     end
   end
@@ -85,6 +91,7 @@ class Deadweight
   def report
     log.puts
     log.puts "found #{@unused_selectors.size} unused selectors out of #{@total_selectors} total".yellow
+    log.puts "found #{@error_selectors.size} which could not be parsed".red
     log.puts
   end
 
@@ -125,6 +132,8 @@ class Deadweight
 
   def dump(output)
     output.puts(@unused_selectors)
+    output.puts "== Error"
+    output.puts(@error_selectors)
   end
 
   def process!(html)

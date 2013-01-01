@@ -28,3 +28,5 @@ input#fancy:nth-child(2):not(#z.o[type='file']) {
 }
 
 @-webkit-keyframes rainbow {}
+
+* :click { outline: 0; }
