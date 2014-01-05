@@ -26,7 +26,7 @@ There are multiple ways to use Deadweight. It's designed to be completely agnost
 
 ### Integrate it With Your Integration Tests ###
 
-Deadweight can hijack your Rails integration tests (both the spartan Test::Unit type and the refreshing Cucumber variety), capturing every page that is returned by your app during testing and saving you the trouble of manually specifying a ton of URLs and login processses.
+Deadweight can hijack your Rails integration tests, capturing every page that is returned by your app during testing and saving you the trouble of manually specifying a ton of URLs and login processses.
 
 First, put this in your `Gemfile`:
 
@@ -37,8 +37,9 @@ First, put this in your `Gemfile`:
 
 Then, run your integration tests with the environment variable `DEADWEIGHT` set to `true`:
 
-    rake test DEADWEIGHT=true
-    rake cucumber DEADWEIGHT=true
+    rake test DEADWEIGHT=true     # Test::Unit
+    rake spec DEADWEIGHT=true     # RSpec
+    rake cucumber DEADWEIGHT=true # Cucumber
 
 Let me know how it goes. It's not terribly customisable at the moment (you can't specify what exact stylesheets to look at, or what selectors to ignore). I'm looking for your feedback on how you'd like to be able to do that.
 
