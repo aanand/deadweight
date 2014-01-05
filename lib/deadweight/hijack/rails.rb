@@ -14,8 +14,11 @@ if ENV['DEADWEIGHT'] == 'true'
 
             dw = Deadweight.new
 
+            system 'rake assets:clobber DEADWEIGHT=false' # Remove existing assets! This seems to be necessary to make sure that they don't exist twice, see http://stackoverflow.com/questions/20938891
+            system 'rake assets:precompile DEADWEIGHT=false'
+
             dw.root        = root + 'public'
-            dw.stylesheets = Dir.chdir(dw.root) { Dir.glob("stylesheets/*.css") }
+            dw.stylesheets = Dir.chdir(dw.root) { Dir.glob("assets/*.css") }
             dw.log_file    = original_stderr
 
             dw.reset!
