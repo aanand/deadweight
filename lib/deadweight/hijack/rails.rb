@@ -21,8 +21,8 @@ if ENV['DEADWEIGHT'] == 'true'
             dw.reset!
 
             at_exit do
-              system 'rake assets:clobber DEADWEIGHT=false'
               dw.report
+              system 'rake assets:clobber DEADWEIGHT=false'
             end
 
             app.middleware.insert(0, Deadweight::Rack::CapturingMiddleware, dw)
