@@ -14,7 +14,7 @@ end
 
 class Deadweight
   attr_accessor :root, :stylesheets, :rules, :pages, :ignore_selectors, :mechanize, :log_file
-  attr_reader :unused_selectors, :parsed_rules
+  attr_reader :unused_selectors, :used_selectors, :parsed_rules
 
   def initialize
     @root = 'http://localhost:3000'
@@ -38,7 +38,7 @@ class Deadweight
       next if stripped_selector.empty?
 
       if doc.search(stripped_selector).any?
-        log.puts("  #{selector.green}")
+        @used_selectors << selector
         selector
       end
     end
@@ -66,26 +66,24 @@ class Deadweight
 
   def reset!
     @parsed_rules     = {}
+    @used_selectors   = []
     @unused_selectors = []
 
     @stylesheets.each do |path|
       new_selector_count = add_css!(fetch(path))
-      log.puts("Found #{new_selector_count} selectors".yellow)
     end
 
     if @rules and !@rules.empty?
       new_selector_count = add_css!(@rules)
-      log.puts
-      log.puts("Added #{new_selector_count} extra selectors".yellow)
     end
 
     @total_selectors = @unused_selectors.size
   end
 
   def report
-    log.puts
-    log.puts "Found #{@unused_selectors.size} unused selectors out of #{@total_selectors} total".yellow
-    log.puts
+    log.puts "Found #{@used_selectors.size + @unused_selectors.size} CSS selectors.".yellow
+    log.puts "#{@used_selectors.size} selectors are in use.".green
+    log.puts "#{@unused_selectors.size} selectors are not: #{@unused_selectors.sort.join(', ').red}".red
   end
 
   # Find all unused CSS selectors and return them as an array.
@@ -93,8 +91,6 @@ class Deadweight
     reset!
 
     pages.each do |page|
-      log.puts
-
       if page.respond_to?(:read)
         html = page.read
       elsif page.respond_to?(:call)
