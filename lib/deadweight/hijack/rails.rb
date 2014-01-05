@@ -20,7 +20,7 @@ if ENV['DEADWEIGHT'] == 'true'
 
             dw.reset!
 
-            at_exit do # FIXME: This doesn't seem to be called! :-(
+            at_exit do
               system 'rake assets:clobber DEADWEIGHT=false'
               dw.report
             end
