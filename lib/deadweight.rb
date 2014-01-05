@@ -70,7 +70,7 @@ class Deadweight
 
     @stylesheets.each do |path|
       new_selector_count = add_css!(fetch(path))
-      log.puts("  found #{new_selector_count} selectors".yellow)
+      log.puts("Found #{new_selector_count} selectors".yellow)
     end
 
     if @rules and !@rules.empty?
@@ -84,7 +84,7 @@ class Deadweight
 
   def report
     log.puts
-    log.puts "found #{@unused_selectors.size} unused selectors out of #{@total_selectors} total".yellow
+    log.puts "Found #{@unused_selectors.size} unused selectors out of #{@total_selectors} total".yellow
     log.puts
   end
 
