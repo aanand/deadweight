@@ -14,6 +14,7 @@ if ENV['DEADWEIGHT'] == 'true'
 
             dw = Deadweight.new
 
+            # TODO: use `rake assets:clean` for Rails < 4!
             system 'rake assets:clobber DEADWEIGHT=false' # Remove existing assets! This seems to be necessary to make sure that they don't exist twice, see http://stackoverflow.com/questions/20938891
             system 'rake assets:precompile DEADWEIGHT=false'
 
