@@ -32,7 +32,7 @@ First, put this in your `Gemfile`:
 
     group :test do
       gem 'colored'
-      gem 'deadweight', :require => 'deadweight/hijack/rails'
+      gem 'deadweight', :require => 'deadweight/rails'
     end
 
 Then, run your integration tests with the environment variable `DEADWEIGHT` set to `true`:
