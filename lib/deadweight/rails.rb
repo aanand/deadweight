@@ -10,12 +10,13 @@ if ENV['DEADWEIGHT'] == 'true'
 
           dw = Deadweight.new
 
-          # TODO: use `rake assets:clean` for Rails < 4!
+          # TODO: suppress logging output of rake tasks!
           system 'rake assets:clobber DEADWEIGHT=false' # Remove existing assets! This seems to be necessary to make sure that they don't exist twice, see http://stackoverflow.com/questions/20938891
           system 'rake assets:precompile DEADWEIGHT=false'
 
-          dw.root        = root + 'public'
-          dw.stylesheets = Dir.chdir(dw.root) { Dir.glob("assets/*.css") }
+          dw.root                           = root + 'public'
+          dw.unused_selectors_log_separator = ', '
+          dw.stylesheets                    = Dir.chdir(dw.root) { Dir.glob("assets/*.css") }
 
           dw.reset!
 

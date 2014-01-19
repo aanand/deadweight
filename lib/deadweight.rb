@@ -13,15 +13,26 @@ rescue LoadError
 end
 
 class Deadweight
-  attr_accessor :root, :stylesheets, :rules, :pages, :ignore_selectors, :mechanize, :log_file
-  attr_reader :unused_selectors, :used_selectors, :parsed_rules
+  attr_accessor :root,
+                :stylesheets,
+                :rules,
+                :pages,
+                :ignore_selectors,
+                :mechanize,
+                :log_file,
+                :unused_selectors_log_separator
+
+  attr_reader :unused_selectors,
+              :used_selectors,
+              :parsed_rules
 
   def initialize
     @root = 'http://localhost:3000'
     @stylesheets = []
     @pages = []
-    @rules = ""
+    @rules = ''
     @ignore_selectors = []
+    @unused_selectors_log_separator = "\n"
     @mechanize = false
     @log_file = STDERR
     yield self and run if block_given?
@@ -83,7 +94,7 @@ class Deadweight
   def report
     log.puts "Found #{@used_selectors.size + @unused_selectors.size} CSS selectors.".yellow
     log.puts "#{@used_selectors.size} selectors are in use.".green
-    log.puts "#{@unused_selectors.size} selectors are not: #{@unused_selectors.sort.join(', ').red}".red
+    log.puts "#{@unused_selectors.size} selectors are not: #{@unused_selectors.sort.join(@unused_selectors_log_separator).red}".red
   end
 
   # Find all unused CSS selectors and return them as an array.
