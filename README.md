@@ -1,6 +1,8 @@
 Deadweight
 ==========
 
+![badge](http://b.adge.me/:kind%20of-rubbish-red.svg)
+
 Deadweight is a CSS coverage tool. Given a set of stylesheets and a set of URLs, it determines which selectors are actually used and reports which can be "safely" deleted.
 
 Screencast!
