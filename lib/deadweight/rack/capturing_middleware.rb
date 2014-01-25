@@ -15,8 +15,8 @@ class Deadweight
       def process(rack_response)
         status, headers, response = rack_response
 
-        if response.respond_to?(:body)
-          html = response.body
+        if response[0]
+          html = response[0]
           @dw.process!(html)
         end
       end
