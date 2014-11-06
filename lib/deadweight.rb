@@ -69,7 +69,9 @@ class Deadweight
     @unused_selectors = []
 
     @stylesheets.each do |path|
-      new_selector_count = add_css!(fetch(path))
+      css = path.respond_to?(:read) ? path.read : fetch(path)
+
+      new_selector_count = add_css!(css)
       log.puts("  found #{new_selector_count} selectors".yellow)
     end
 
