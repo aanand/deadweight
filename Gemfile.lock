@@ -6,7 +6,7 @@ PATH
       nokogiri
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     addressable (2.3.2)
     css_parser (1.2.6)
