@@ -19,7 +19,7 @@
     color: white;
 }
 
-#rab:hover::selection {
+#rab ::selection {
     color: black;
 }
 
