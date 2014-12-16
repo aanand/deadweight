@@ -176,7 +176,7 @@ private
   def strip(selector)
     selector = selector.gsub(/^@.*/, '') # @-webkit-keyframes ...
     selector = selector.gsub(/:.*/, '')  # input#x:nth-child(2):not(#z.o[type='file'])
-    selector
+    selector.strip
   end
 
   def log

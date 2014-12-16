@@ -36,7 +36,7 @@ class DeadweightTest < Test::Unit::TestCase
     assert !@result.include?('#foo:hover')
 
     # #rab:hover::selection (#rab does not exist)
-    assert @result.include?('#rab:hover::selection')
+    assert @result.include?('#rab ::selection')
 
     # input#fancy:nth-child(2):not(#z.o[type='file']) (input#fancy does exist)
     assert !@result.include?("input#fancy:nth-child(2):not(#z.o[type='file'])")
