@@ -37,7 +37,7 @@ class Deadweight
 
       next if stripped_selector.empty?
 
-      if doc.search(stripped_selector).any?
+      if doc.css(stripped_selector).any?
         log.puts("  #{selector.green}")
         selector
       end
