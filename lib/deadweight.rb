@@ -14,7 +14,9 @@ end
 
 class Deadweight
   attr_accessor :root, :stylesheets, :rules, :pages, :ignore_selectors, :mechanize, :log_file
-  attr_reader :unused_selectors, :parsed_rules
+  attr_reader :selectors_details
+
+  SelectorDetails = Struct.new(:normalized_selector, :original_selectors, :declarations)
 
   def initialize
     @root = 'http://localhost:3000'
@@ -30,7 +32,7 @@ class Deadweight
   def analyze(html)
     doc = Nokogiri::HTML(html)
 
-    @unused_selectors.collect do |selector, declarations|
+    @unused_normalized_selectors.collect do |selector, declarations|
       # We test against the selector stripped of any pseudo classes,
       # but we report on the selector with its pseudo classes.
       stripped_selector = strip(selector)
@@ -48,25 +50,32 @@ class Deadweight
     parser = CssParser::Parser.new
     parser.add_block!(css)
 
-    selector_count = 0
+    new_selectors_count = 0
 
     parser.each_selector do |selector, declarations, specificity|
-      next if @unused_selectors.include?(selector)
       next if selector =~ @ignore_selectors
-      next if has_pseudo_classes(selector) and @unused_selectors.include?(strip(selector))
+      normalized_selector = normalize_whitespace(selector)
+      next if normalized_selector =~ @ignore_selectors
 
-      @unused_selectors << selector
-      @parsed_rules[selector] = declarations
+      selector_details = @selectors_details[normalized_selector]
+      selector_details ||= SelectorDetails.new(normalized_selector, [], [])
 
-      selector_count += 1
+      selector_details.original_selectors << selector
+      selector_details.declarations << declarations
+
+      next if selector_details.original_selectors.size > 1
+
+      @selectors_details[normalized_selector] = selector_details
+      @unused_normalized_selectors << normalized_selector
+      new_selectors_count += 1
     end
 
-    selector_count
+    new_selectors_count
   end
 
   def reset!
-    @parsed_rules     = {}
-    @unused_selectors = []
+    @unused_normalized_selectors = []
+    @selectors_details = {}
 
     @stylesheets.each do |path|
       new_selector_count = add_css!(fetch(path))
@@ -79,12 +88,12 @@ class Deadweight
       log.puts("Added #{new_selector_count} extra selectors".yellow)
     end
 
-    @total_selectors = @unused_selectors.size
+    @total_selectors = @unused_normalized_selectors.size
   end
 
   def report
     log.puts
-    log.puts "found #{@unused_selectors.size} unused selectors out of #{@total_selectors} total".yellow
+    log.puts "found #{unused_selectors.size} unused selectors out of #{@total_selectors} total".yellow
     log.puts
   end
 
@@ -120,16 +129,20 @@ class Deadweight
 
     report
 
-    @unused_selectors
+    unused_selectors
+  end
+
+  def unused_selectors
+    @unused_normalized_selectors.map{|s| @selectors_details[s].original_selectors}.flatten
   end
 
   def dump(output)
-    output.puts(@unused_selectors)
+    output.puts(unused_selectors)
   end
 
   def process!(html)
     analyze(html).each do |selector|
-      @unused_selectors.delete(selector)
+      @unused_normalized_selectors.delete(selector)
     end
   end
 
@@ -173,10 +186,28 @@ private
     selector =~ /::?[\w\-]+/
   end
 
+  def normalize_whitespace(selector)
+    tokenizer = Nokogiri::CSS::Tokenizer.new
+    tokenizer.scan_setup(selector)
+    normalized_selector = ''
+    while token = tokenizer.next_token
+      type, text = token
+      # We remove all the unnecessary spaces unless it's a significative one, which corresponds to the type :S
+      # When it's a significant space, we leave a single one of them.
+      normalized_selector << (type == :S ? ' ' : text.strip)
+    end
+    normalized_selector.strip
+  end
+
+  def unsupported_selector?(selector)
+    ( selector =~ /^@.*/ || # at_rules not supported (ex: @-webkit-keyframes )
+        selector =~ /:.*/ ) # pseudo-classes not supported (ex: :nth-child(2))
+  end
+
   def strip(selector)
-    selector = selector.gsub(/^@.*/, '') # @-webkit-keyframes ...
+    selector = selector.gsub(/^@.*/, '') # remove
     selector = selector.gsub(/:.*/, '')  # input#x:nth-child(2):not(#z.o[type='file'])
-    selector.strip
+    normalize_whitespace(selector) # hello     world => hello world
   end
 
   def log
