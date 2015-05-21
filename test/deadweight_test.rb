@@ -73,6 +73,6 @@ class DeadweightTest < Test::Unit::TestCase
   end
 
   should 'provide the parsed CSS rules with #parsed_rules' do
-    assert_includes @dw.selectors_details['#foo'].declarations, 'color: green;'
+    assert_includes @dw.selector_nodes['#foo'].declarations, 'color: green;'
   end
 end

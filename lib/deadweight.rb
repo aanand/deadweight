@@ -1,4 +1,5 @@
 require 'css_parser'
+require 'bisect'
 require 'nokogiri'
 require 'open-uri'
 
@@ -12,11 +13,10 @@ rescue LoadError
   end
 end
 
+
 class Deadweight
   attr_accessor :root, :stylesheets, :rules, :pages, :ignore_selectors, :mechanize, :log_file
-  attr_reader :selectors_details
-
-  SelectorDetails = Struct.new(:normalized_selector, :original_selectors, :declarations)
+  attr_reader :selector_nodes, :selector_tree_root
 
   def initialize
     @root = 'http://localhost:3000'
@@ -29,10 +29,12 @@ class Deadweight
     yield self and run if block_given?
   end
 
-  def analyze(html)
+  def analyze(html, selector_list=nil)
     doc = Nokogiri::HTML(html)
 
-    @unused_normalized_selectors.collect do |selector, declarations|
+    selector_list ||= @unused_normalized_selectors
+
+    selector_list.collect do |selector, declarations|
       # We test against the selector stripped of any pseudo classes,
       # but we report on the selector with its pseudo classes.
       stripped_selector = strip(selector)
@@ -57,16 +59,18 @@ class Deadweight
       normalized_selector = normalize_whitespace(selector)
       next if normalized_selector =~ @ignore_selectors
 
-      selector_details = @selectors_details[normalized_selector]
-      selector_details ||= SelectorDetails.new(normalized_selector, [], [])
+      selector_node = @selector_nodes[normalized_selector]
+      selector_node ||= SelectorTreeNode.new(normalized_selector)
 
-      selector_details.original_selectors << selector
-      selector_details.declarations << declarations
+      selector_node.original_selectors << selector
+      selector_node.declarations << declarations
 
-      next if selector_details.original_selectors.size > 1
+      next if @selector_nodes[normalized_selector]
 
-      @selectors_details[normalized_selector] = selector_details
-      @unused_normalized_selectors << normalized_selector
+      @selector_nodes[normalized_selector] = selector_node
+      @selector_tree_root.add_node(selector_node)
+
+      @unused_normalized_selectors << normalized_selector if @selector_tree_root.children.include?(selector_node)
       new_selectors_count += 1
     end
 
@@ -75,7 +79,8 @@ class Deadweight
 
   def reset!
     @unused_normalized_selectors = []
-    @selectors_details = {}
+    @selector_nodes = {}
+    @selector_tree_root = SelectorTreeNode.new('ROOT')
 
     @stylesheets.each do |path|
       new_selector_count = add_css!(fetch(path))
@@ -133,7 +138,7 @@ class Deadweight
   end
 
   def unused_selectors
-    @unused_normalized_selectors.map{|s| @selectors_details[s].original_selectors}.flatten
+    @unused_normalized_selectors.map{|s| @selector_nodes[s].and_descendants}.flatten.map(&:selector)
   end
 
   def dump(output)
@@ -141,8 +146,20 @@ class Deadweight
   end
 
   def process!(html)
-    analyze(html).each do |selector|
-      @unused_normalized_selectors.delete(selector)
+    selector_list = @unused_normalized_selectors
+    until selector_list.empty?
+      new_selector_list = []
+
+      analyze(html, selector_list).each do |selector|
+        next if selector.nil?
+        selector_node = @selector_nodes[selector]
+        @unused_normalized_selectors.delete(selector)
+        new_selectors = selector_node.children.map(&:selector)
+        @unused_normalized_selectors.push(*new_selectors)
+        new_selector_list.push(*new_selectors)
+      end
+
+      selector_list = new_selector_list
     end
   end
 
@@ -246,6 +263,6 @@ private
 
   class FetchError < StandardError; end
 end
-
+require 'deadweight/selector_tree_node'
 require 'deadweight/rake_task'
 
