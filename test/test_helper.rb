@@ -7,7 +7,7 @@ require 'shoulda'
 require 'deadweight'
 
 class Test::Unit::TestCase
-  UNUSED_SELECTORS = ['#foo .bar .baz']
+  UNUSED_SELECTORS = ['#foo .bar .baz', '#foo .bar .baz.bazagain']
   USED_SELECTORS   = ['#foo', '#foo .bar']
 
   def self.should_correctly_report_selectors

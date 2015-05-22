@@ -42,7 +42,7 @@ class Deadweight
     end
 
     def descendants
-      children.map(&:descendants).flatten
+      children + children.map(&:descendants)
     end
 
     # .hello is implied by .hello.world, because if something matches .hello.world, it has to also match .hello.
