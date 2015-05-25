@@ -5,6 +5,7 @@ class DeadweightTest < Test::Unit::TestCase
     @dw = Deadweight.new
     default_settings(@dw)
     @result = @dw.run
+
   end
 
   context "when initialized with a block" do
@@ -23,14 +24,14 @@ class DeadweightTest < Test::Unit::TestCase
       assert_equal(@dw.pages,       @dwb.pages)
     end
 
-    should_correctly_report_selectors
+    should_correctly_report_selectors('index')
   end
 
-  should_correctly_report_selectors
+  should_correctly_report_selectors('index')
 
   should 'strip pseudo classes from selectors' do
     # #oof:hover (#oof does not exist)
-    assert @result.include?('#oof:hover'), @result.inspect
+    assert @result.include?('#oof:nth-child(12)'), @result.inspect
 
     # #foo:hover (#foo does exist)
     assert !@result.include?('#foo:hover')
@@ -53,13 +54,12 @@ class DeadweightTest < Test::Unit::TestCase
       agent.page.links.first.click
     }
 
-    assert @dw.run.empty?
+    assert_correct_selectors_in_output @dw.run, ['index', 'index2']
   end
 
   should "accept IO objects as targets" do
     @dw.pages << File.new(File.dirname(__FILE__) + '/fixtures/index2.html')
-
-    assert @dw.run.empty?
+    assert_correct_selectors_in_output @dw.run, ['index', 'index2']
   end
 
   should "allow individual CSS rules to be appended" do
@@ -69,7 +69,7 @@ class DeadweightTest < Test::Unit::TestCase
   end
 
   should 'provide the results of its last run with #unused_selectors' do
-    assert_equal @result, @dw.unused_selectors
+    assert_equal @result, @dw.unused_selectors + @dw.unsupported_selectors
   end
 
   should 'provide the parsed CSS rules with #parsed_rules' do

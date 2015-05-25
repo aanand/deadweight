@@ -14,21 +14,35 @@
     color: red;
 }
 
-/* pseudo classes */
+/* this pseudo class is not supported by Nokogiri, but we support it by simply stripping the pseudo class*/
 #foo:hover {
     color: red;
 }
 
-#oof:hover {
+/* This pseudo-class is supported but will match nothing. */
+#oof:nth-child(12) {
     color: white;
 }
 
+/* Pseudo-elements are simply stripped. */
 #rab ::selection {
     color: black;
 }
 
-input#fancy:nth-child(2):not(#z.o[type='file']) {
+/* They can even be chained! */
+body input#fancy:nth-child(3):not(.qwerty) {
     color: red;
 }
 
-@-webkit-keyframes rainbow {}
+
+/* unsupported (not a real one) pseudo-class */
+body foo:nothing-to-see {
+    color: teal;
+}
+
+/* unsupported at rule */
+@-webkit-keyframes rainbow {
+    from {top: 0px;}
+    to {top: 200px;}
+}
+
