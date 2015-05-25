@@ -1,6 +1,7 @@
 class Deadweight
   class SelectorTreeNode
     include Comparable
+    include DeadweightHelper
 
     attr_accessor :selector, :original_selectors, :declarations, :children
 
@@ -11,13 +12,17 @@ class Deadweight
       self.children = []
     end
 
+    def from_css?
+      !original_selectors.empty?
+    end
+
     def <=>(other)
       return false unless other.is_a?(SelectorTreeNode)
       selector <=> other.selector
     end
 
     def inspect
-      "<#{selector.inspect} => #{children.inspect}>"
+      "{#{selector.inspect} => #{children.inspect}}"
     end
 
     def add_node(node)
@@ -42,7 +47,7 @@ class Deadweight
     end
 
     def descendants
-      children + children.map(&:descendants)
+      children + children.map(&:descendants).flatten
     end
 
     # .hello is implied by .hello.world, because if something matches .hello.world, it has to also match .hello.

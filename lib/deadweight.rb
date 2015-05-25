@@ -2,6 +2,7 @@ require 'css_parser'
 require 'bisect'
 require 'nokogiri'
 require 'open-uri'
+require 'deadweight/deadweight_helper'
 
 begin
   require 'colored'
@@ -17,6 +18,7 @@ end
 class Deadweight
   attr_accessor :root, :stylesheets, :rules, :pages, :ignore_selectors, :mechanize, :log_file
   attr_reader :selector_nodes, :selector_tree_root
+  include DeadweightHelper
 
   def initialize
     @root = 'http://localhost:3000'
@@ -29,22 +31,41 @@ class Deadweight
     yield self and run if block_given?
   end
 
-  def analyze(html, selector_list=nil)
+  def analyze(html, selector_nodes=nil)
     doc = Nokogiri::HTML(html)
 
-    selector_list ||= @unused_normalized_selectors
+    selector_nodes ||= @unused_selector_nodes.dup
 
-    selector_list.collect do |selector, declarations|
-      # We test against the selector stripped of any pseudo classes,
-      # but we report on the selector with its pseudo classes.
-      stripped_selector = strip(selector)
+    found_nodes = selector_nodes.collect do |selector_node|
+      selector = selector_node.selector
 
-      next if stripped_selector.empty?
-
-      if doc.css(stripped_selector).any?
-        log.puts("  #{selector.green}")
-        selector
+      begin
+        if doc.css(selector).any?
+          log.puts("  #{selector.green}") if selector_node.from_css?
+          selector_node
+        end
+      rescue
+        @unused_selector_nodes.delete(selector_node)
+        @unsupported_selector_nodes << selector_node
+        nil
       end
+    end
+
+    found_nodes.compact
+  end
+
+  def process!(html)
+    selector_nodes = @unused_selector_nodes
+    until selector_nodes.empty?
+      new_selector_nodes = []
+
+      analyze(html, selector_nodes).each do |found_node|
+        @unused_selector_nodes.delete(found_node)
+        @unused_selector_nodes.push(*found_node.children)
+        new_selector_nodes.push(*found_node.children)
+      end
+
+      selector_nodes = new_selector_nodes
     end
   end
 
@@ -54,10 +75,11 @@ class Deadweight
 
     new_selectors_count = 0
 
+    first_nodes = @selector_tree_root.children.dup
+
     parser.each_selector do |selector, declarations, specificity|
-      next if selector =~ @ignore_selectors
-      normalized_selector = normalize_whitespace(selector)
-      next if normalized_selector =~ @ignore_selectors
+      next if selector =~ @ignore_selectors || normalize_whitespace(selector) =~ @ignore_selectors
+      normalized_selector = normalize(selector)
 
       selector_node = @selector_nodes[normalized_selector]
       selector_node ||= SelectorTreeNode.new(normalized_selector)
@@ -68,19 +90,27 @@ class Deadweight
       next if @selector_nodes[normalized_selector]
 
       @selector_nodes[normalized_selector] = selector_node
-      @selector_tree_root.add_node(selector_node)
-
-      @unused_normalized_selectors << normalized_selector if @selector_tree_root.children.include?(selector_node)
       new_selectors_count += 1
+
+      if known_unsupported_selector?(normalized_selector)
+        @unsupported_selector_nodes << selector_node
+      else
+        @selector_tree_root.add_node(selector_node)
+      end
+
     end
+
+    new_root_nodes = @selector_tree_root.children - first_nodes
+    @unused_selector_nodes.push(*new_root_nodes)
 
     new_selectors_count
   end
 
   def reset!
-    @unused_normalized_selectors = []
+    @unused_selector_nodes = []
+    @unsupported_selector_nodes = []
     @selector_nodes = {}
-    @selector_tree_root = SelectorTreeNode.new('ROOT')
+    @selector_tree_root = SelectorTreeRoot.new
 
     @stylesheets.each do |path|
       new_selector_count = add_css!(fetch(path))
@@ -93,12 +123,12 @@ class Deadweight
       log.puts("Added #{new_selector_count} extra selectors".yellow)
     end
 
-    @total_selectors = @unused_normalized_selectors.size
+    @total_selectors = (@selector_tree_root.descendants.select(&:from_css?) + @unsupported_selector_nodes).size
   end
 
   def report
     log.puts
-    log.puts "found #{unused_selectors.size} unused selectors out of #{@total_selectors} total".yellow
+    log.puts "found #{selectors_to_review.size} unused selectors out of #{@total_selectors} total".yellow
     log.puts
   end
 
@@ -134,33 +164,23 @@ class Deadweight
 
     report
 
-    unused_selectors
+    selectors_to_review
+  end
+
+  def selectors_to_review
+    (unused_selectors + unsupported_selectors).uniq
   end
 
   def unused_selectors
-    @unused_normalized_selectors.map{|s| @selector_nodes[s].and_descendants}.flatten.map(&:selector)
+    @unused_selector_nodes.map{|node| node.and_descendants}.flatten.map(&:original_selectors).uniq
+  end
+
+  def unsupported_selectors
+    @unsupported_selector_nodes.map{|node| node.and_descendants}.flatten.map(&:original_selectors).flatten.uniq
   end
 
   def dump(output)
-    output.puts(unused_selectors)
-  end
-
-  def process!(html)
-    selector_list = @unused_normalized_selectors
-    until selector_list.empty?
-      new_selector_list = []
-
-      analyze(html, selector_list).each do |selector|
-        next if selector.nil?
-        selector_node = @selector_nodes[selector]
-        @unused_normalized_selectors.delete(selector)
-        new_selectors = selector_node.children.map(&:selector)
-        @unused_normalized_selectors.push(*new_selectors)
-        new_selector_list.push(*new_selectors)
-      end
-
-      selector_list = new_selector_list
-    end
+    output.puts(selectors_to_review)
   end
 
   # Returns the Mechanize instance, if +mechanize+ is set to +true+.
@@ -199,16 +219,14 @@ class Deadweight
 
 private
 
-  def has_pseudo_classes(selector)
-    selector =~ /::?[\w\-]+/
+  def normalize(selector)
+    normalize_whitespace(remove_simple_pseudo(selector))
   end
 
   def normalize_whitespace(selector)
-    tokenizer = Nokogiri::CSS::Tokenizer.new
-    tokenizer.scan_setup(selector)
     normalized_selector = ''
-    while token = tokenizer.next_token
-      type, text = token
+
+    tokenize_selector(selector).each do |type, text|
       # We remove all the unnecessary spaces unless it's a significative one, which corresponds to the type :S
       # When it's a significant space, we leave a single one of them.
       normalized_selector << (type == :S ? ' ' : text.strip)
@@ -216,15 +234,40 @@ private
     normalized_selector.strip
   end
 
-  def unsupported_selector?(selector)
-    ( selector =~ /^@.*/ || # at_rules not supported (ex: @-webkit-keyframes )
-        selector =~ /:.*/ ) # pseudo-classes not supported (ex: :nth-child(2))
+  # Nokogiri supports lots of pseudo-classes! Those it doesn't support, we will eventually mark as unsupported if they are reached in the pages.
+  # However, some of those unsupported pseudo-classes (and all pseudo-elements) can be implied from other rules.
+  # Example, if we find ".hello", then we can pretty safely infer that ".hello:hover" is used (unless it's never actually displayed...)
+  def remove_simple_pseudo(selector)
+    selector_text_parts = []
+    selector_type_parts = []
+
+    tokenize_selector(selector).each do |type, text|
+      if %w(hover valid).include?(text) && selector_type_parts[-1] == ':'
+        # Discard :hover
+        selector_type_parts.pop
+        selector_text_parts.pop
+        next
+      elsif selector_type_parts[-2..-1] == [':', ':']
+        # Discard all pseudo-elements (those starting with ::)
+        selector_type_parts.pop(2)
+        selector_text_parts.pop(2)
+        next
+      end
+
+      selector_type_parts << type
+      selector_text_parts << text
+    end
+
+    selector_text_parts.join
   end
 
-  def strip(selector)
-    selector = selector.gsub(/^@.*/, '') # remove
-    selector = selector.gsub(/:.*/, '')  # input#x:nth-child(2):not(#z.o[type='file'])
-    normalize_whitespace(selector) # hello     world => hello world
+  # No idea what we should do with at_rules
+  def known_unsupported_selector?(selector)
+    tokenize_selector(selector).each do |type, text|
+      return true if type == :IDENT && text.start_with?('@')
+      return true if type == '@'
+    end
+    return false
   end
 
   def log
@@ -264,5 +307,6 @@ private
   class FetchError < StandardError; end
 end
 require 'deadweight/selector_tree_node'
+require 'deadweight/selector_tree_root'
 require 'deadweight/rake_task'
 
