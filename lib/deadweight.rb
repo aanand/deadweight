@@ -123,7 +123,7 @@ class Deadweight
       log.puts("Added #{new_selector_count} extra selectors".yellow)
     end
 
-    @total_selectors = (@selector_tree_root.descendants.select(&:from_css?) + @unsupported_selector_nodes).size
+    @total_selectors = selectors_from_nodes(@selector_tree_root.children + @unsupported_selector_nodes).size
   end
 
   def report
