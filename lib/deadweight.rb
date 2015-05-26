@@ -172,7 +172,7 @@ class Deadweight
   end
 
   def unused_selectors
-    @unused_selector_nodes.map{|node| node.and_descendants}.flatten.map(&:original_selectors).uniq
+    @unused_selector_nodes.map{|node| node.and_descendants}.flatten.map(&:original_selectors).flatten.uniq
   end
 
   def unsupported_selectors
