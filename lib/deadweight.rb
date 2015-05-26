@@ -171,14 +171,17 @@ class Deadweight
     (unused_selectors(&block) + unsupported_selectors(&block)).uniq
   end
 
-  def unused_selectors(&block)
+  def selectors_from_nodes(selector_nodes, &block)
     block ||= :original_selectors.to_proc
-    @unused_selector_nodes.map{|node| node.and_descendants}.flatten.select(&:from_css?).map(&block).flatten.uniq
+    selector_nodes.flatten.map{|node| node.and_descendants}.flatten.select(&:from_css?).map(&block).flatten.uniq
+  end
+
+  def unused_selectors(&block)
+    selectors_from_nodes(@unused_selector_nodes, &block)
   end
 
   def unsupported_selectors(&block)
-    block ||= :original_selectors.to_proc
-    @unsupported_selector_nodes.map{|node| node.and_descendants}.flatten.select(&:from_css?).map(&block).flatten.uniq
+    selectors_from_nodes(@unsupported_selector_nodes, &block)
   end
 
   def dump(output)
