@@ -17,7 +17,7 @@ end
 
 class Deadweight
   attr_accessor :root, :stylesheets, :rules, :pages, :ignore_selectors, :mechanize, :log_file
-  attr_reader :selector_nodes, :selector_tree_root
+  attr_reader :selector_nodes, :selector_tree_root, :unused_selector_nodes, :unsupported_selector_nodes
   include DeadweightHelper
 
   def initialize
@@ -167,16 +167,18 @@ class Deadweight
     selectors_to_review
   end
 
-  def selectors_to_review
-    (unused_selectors + unsupported_selectors).uniq
+  def selectors_to_review(&block)
+    (unused_selectors(&block) + unsupported_selectors(&block)).uniq
   end
 
-  def unused_selectors
-    @unused_selector_nodes.map{|node| node.and_descendants}.flatten.map(&:original_selectors).flatten.uniq
+  def unused_selectors(&block)
+    block ||= :original_selectors.to_proc
+    @unused_selector_nodes.map{|node| node.and_descendants}.flatten.select(&:from_css?).map(&block).flatten.uniq
   end
 
-  def unsupported_selectors
-    @unsupported_selector_nodes.map{|node| node.and_descendants}.flatten.map(&:original_selectors).flatten.uniq
+  def unsupported_selectors(&block)
+    block ||= :original_selectors.to_proc
+    @unsupported_selector_nodes.map{|node| node.and_descendants}.flatten.select(&:from_css?).map(&block).flatten.uniq
   end
 
   def dump(output)
