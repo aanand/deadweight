@@ -243,16 +243,21 @@ private
     selector_text_parts = []
     selector_type_parts = []
 
+    discarded_pseudo = %w(active checked disabled enabled focus hover in-range invalid lang link optional out-of-range read-only read-write required target valid visited)
+
+    # These are pseudo-elements. Correct CSS3 would be using :: for these, but single-colon syntax is still valid.
+    discarded_pseudo += %w(after before first-letter first-line selection)
+
     tokenize_selector(selector).each do |type, text|
-      if %w(hover valid).include?(text) && selector_type_parts[-1] == ':'
-        # Discard :hover
-        selector_type_parts.pop
-        selector_text_parts.pop
-        next
-      elsif selector_type_parts[-2..-1] == [':', ':']
+      if selector_type_parts[-2..-1] == [':', ':']
         # Discard all pseudo-elements (those starting with ::)
         selector_type_parts.pop(2)
         selector_text_parts.pop(2)
+        next
+      elsif selector_type_parts[-1] == ':' && discarded_pseudo.include?(text)
+        # Discard :hover, :valid
+        selector_type_parts.pop
+        selector_text_parts.pop
         next
       end
 
