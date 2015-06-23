@@ -43,5 +43,9 @@ PLATFORMS
 DEPENDENCIES
   deadweight!
   mechanize (~> 2.5.1)
+  nokogiri (~> 1.6.6.2)
   rake
   shoulda
+
+BUNDLED WITH
+   1.10.4

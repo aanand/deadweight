@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "shoulda"
   s.add_development_dependency "mechanize", "~> 2.5.1"
   s.add_development_dependency "rake"
+  s.add_development_dependency "nokogiri", '~> 1.6.6.2'
 
   s.files        = `git ls-files LICENSE README.md bin lib vendor`.split
   s.require_path = 'lib'
