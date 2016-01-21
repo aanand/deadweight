@@ -43,6 +43,9 @@ class DeadweightTest < Test::Unit::TestCase
 
     # @-webkit-keyframes (ignore)
     assert !@result.include?("@-webkit-keyframes")
+
+    # a[href^="javascript:"]:after (the semicolon after 'javascript' does not indicate a pseudo class)
+    assert !@result.include?("javascript:")
   end
 
   should "accept Procs as targets" do
