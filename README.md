@@ -1,7 +1,13 @@
 Deadweight
 ==========
 
-![badge](http://b.adge.me/:kind%20of-rubbish-red.svg)
+WARNING
+-------
+
+This project is no longer maintained. I recommend that you use a different tool. I don't have a specific one to suggest, having never used any, but [PurifyCSS](https://github.com/purifycss/purifycss) and [UnCSS](https://github.com/giakki/uncss) both seem to be actively worked on.
+
+Overview
+--------
 
 Deadweight is a CSS coverage tool. Given a set of stylesheets and a set of URLs, it determines which selectors are actually used and reports which can be "safely" deleted.
 
