@@ -92,11 +92,11 @@ By default, Deadweight uses `http://localhost:3000` as the base URL for all path
 What About Stuff Added by Javascript?
 -------------------------------------
 
-Deadweight is completely dumb about any classes, IDs or tags that are only added by your Javascript layer, but you can filter them out by setting `ignore_selectors`:
+Deadweight is completely ignorant of classes, IDs or tags added by your Javascript layer, but you can filter them out by setting `ignore_selectors`:
 
     dw.ignore_selectors = /hover|lightbox|superimposed_kittens/
 
-The command-line tool also has basic support for [Lyndon](http://github.com/defunkt/lyndon) with the `-L` flag, which simply pipes all HTML through the `lyndon` executable.
+The command-line tool also has basic support for [Lyndon](http://github.com/defunkt/lyndon) with the `-L` flag, which simply pipes all HTML through the `lyndon` executable to execute any embedded or linked JS.
 
 You Can Use Mechanize for Complex Stuff
 ---------------------------------------
