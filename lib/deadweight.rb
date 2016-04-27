@@ -175,7 +175,7 @@ private
 
   def strip(selector)
     selector = selector.gsub(/^@.*/, '') # @-webkit-keyframes ...
-    selector = selector.gsub(/:.*/, '')  # input#x:nth-child(2):not(#z.o[type='file'])
+    selector = selector.gsub(/(?<!javascript):.*/, '')  # input#x:nth-child(2):not(#z.o[type='file']) but not a[href^="javascript:"]:after
     selector.strip
   end
 
