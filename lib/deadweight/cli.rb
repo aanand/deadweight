@@ -10,6 +10,7 @@ class Deadweight
     def self.execute(stdout, stdin, stderr, arguments = [])
       @options = {
         :root       => "",
+        :media_root => nil,
         :log_file   => stderr,
         :output     => stdout,
         :proxy_port => 8002
@@ -53,8 +54,13 @@ class Deadweight
         end
 
         opts.on("-r", "--root URL-OR-PATH",
-                "Specify a root for all urls/paths") do |r|
-          @options[:root] = r
+                "Specify a root for all paths") do |r|
+           @options[:root] = r
+        end
+
+        opts.on("-m", "--media_root URL-OR-PATH",
+                "Specify a root for all CSS files") do |m|
+            @options[:media_root] = m
         end
 
         opts.on("-w", "--whitelist URL-PREFIX",
@@ -96,6 +102,8 @@ class Deadweight
       # TODO this should be the default
       dw.root = options[:root]
 
+      dw.media_root = options[:media_root]
+
       dw.log_file = options[:log_file]
 
       dw.stylesheets = options[:stylesheets]
@@ -119,6 +127,8 @@ class Deadweight
 
       # TODO note the boilerplate shared with #process
       dw.root = options[:root]
+
+      dw.media_root = options[:media_root]
       dw.log_file = options[:log_file]
       dw.stylesheets = options[:stylesheets]
       dw.rules = stdin.read if stdin.stat.size > 0

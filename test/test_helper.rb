@@ -41,6 +41,7 @@ class Test::Unit::TestCase
   def default_settings(dw)
     dw.log_file = 'test.log'
     dw.root = File.dirname(__FILE__) + '/fixtures'
+    dw.media_root = nil
     dw.stylesheets << '/style.css'
     dw.pages << '/index.html'
   end

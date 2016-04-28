@@ -13,11 +13,12 @@ rescue LoadError
 end
 
 class Deadweight
-  attr_accessor :root, :stylesheets, :rules, :pages, :ignore_selectors, :mechanize, :log_file
+  attr_accessor :root, :media_root, :stylesheets, :rules, :pages, :ignore_selectors, :mechanize, :log_file
   attr_reader :unused_selectors, :parsed_rules
 
   def initialize
     @root = 'http://localhost:3000'
+    @media_root = nil
     @stylesheets = []
     @pages = []
     @rules = ""
@@ -69,7 +70,7 @@ class Deadweight
     @unused_selectors = []
 
     @stylesheets.each do |path|
-      new_selector_count = add_css!(fetch(path))
+      new_selector_count = add_css!(fetch(path, "media"))
       log.puts("  found #{new_selector_count} selectors".yellow)
     end
 
@@ -139,10 +140,14 @@ class Deadweight
   end
 
   # Fetch a path, using Mechanize if +mechanize+ is set to +true+.
-  def fetch(path)
+  def fetch(path, type = "html")
     log.puts(path)
 
-    loc = root + path
+    if media_root && type == "media"
+      loc = media_root + path
+    else
+      loc = root + path
+    end
 
     if @mechanize
       loc = "file://#{File.expand_path(loc)}" unless loc =~ %r{^\w+://}
