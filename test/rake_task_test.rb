@@ -20,7 +20,7 @@ class RakeTaskTest < Test::Unit::TestCase
       @task.execute
       @io.close
 
-      assert_correct_selectors_in_output(@io.string)
+      assert_correct_selectors_in_output(@io.string, 'index')
     end
   end
 end

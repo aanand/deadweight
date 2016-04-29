@@ -1,0 +1,16 @@
+
+:used_rules:
+  - "#foo"
+  - "#foo .bar"
+  - "#foo .bar .baz"
+  - "#foo .bar .baz.bazagain"
+  - "#foo:hover"
+  - "#rab ::selection"
+
+:unused_rules:
+  - "#oof:nth-child(12)"
+  - "body input#fancy:nth-child(3):not(.qwerty)"
+
+:unsupported_rules:
+  - "body foo:nothing-to-see"
+  - "@-webkit-keyframes rainbow"

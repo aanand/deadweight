@@ -5,7 +5,7 @@ class CliTest < Test::Unit::TestCase
   FULL_COMMAND = "#{COMMAND} -s test/fixtures/style.css test/fixtures/index.html 2>/dev/null"
 
   should "output unused selectors on STDOUT" do
-    assert_correct_selectors_in_output(`#{FULL_COMMAND}`)
+    assert_correct_selectors_in_output(`#{FULL_COMMAND}`, 'index')
   end
 
   if `echo "hello" | ruby -e 'puts STDIN.stat.size'` == "6\n"
@@ -19,7 +19,7 @@ class CliTest < Test::Unit::TestCase
 
   should "accept a [-r | --root] argument and relative paths" do
     %w(-r --root).each do |arg|
-      assert_correct_selectors_in_output(`#{COMMAND} #{arg} test/fixtures -s /style.css /index.html 2>/dev/null`)
+      assert_correct_selectors_in_output(`#{COMMAND} #{arg} test/fixtures -s /style.css /index.html 2>/dev/null`, 'index')
     end
   end
 end
