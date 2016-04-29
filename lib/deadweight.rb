@@ -142,7 +142,11 @@ class Deadweight
   def fetch(path)
     log.puts(path)
 
-    loc = root + path
+	if path.match(/^(f|ht)tp/)
+		loc = path
+	else
+		loc = root + path
+	end
 
     if @mechanize
       loc = "file://#{File.expand_path(loc)}" unless loc =~ %r{^\w+://}
