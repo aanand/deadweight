@@ -9,6 +9,8 @@ This project is no longer maintained. I recommend that you use a different tool.
 Overview
 --------
 
+**This gem is not maintained anymore. If you're on a Rails project, you may want to consider using [Headhunter](https://github.com/jmuheim/headhunter) which - among other features - offers the same functionality.**
+
 Deadweight is a CSS coverage tool. Given a set of stylesheets and a set of URLs, it determines which selectors are actually used and reports which can be "safely" deleted.
 
 Screencast!
