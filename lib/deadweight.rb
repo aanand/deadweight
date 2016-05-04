@@ -175,8 +175,24 @@ private
 
   def strip(selector)
     selector = selector.gsub(/^@.*/, '') # @-webkit-keyframes ...
-    selector = selector.gsub(/:.*/, '')  # input#x:nth-child(2):not(#z.o[type='file'])
+    selector = remove_pseudo_classes(selector)
     selector.strip
+  end
+
+  def remove_pseudo_classes(selector)
+    elements = selector.split(/(::?)/)
+
+    (elements.size / 2).times do |idx|
+      candidate = elements[0..(idx * 2)].join.strip
+
+      begin
+        Nokogiri::CSS.parse(candidate)
+        return candidate
+      rescue Nokogiri::CSS::SyntaxError
+      end
+    end
+
+    selector
   end
 
   def log

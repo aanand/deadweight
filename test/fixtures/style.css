@@ -28,3 +28,7 @@ input#fancy:nth-child(2):not(#z.o[type='file']) {
 }
 
 @-webkit-keyframes rainbow {}
+
+a[href^="javascript:"]:after {
+  content: "";
+}
